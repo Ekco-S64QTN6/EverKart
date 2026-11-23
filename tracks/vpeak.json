@@ -1,0 +1,528 @@
+{
+ "name": "vpeak",
+ "zone": "veeshan",
+ "title": "Veeshan's Peak",
+ "sub": "From the zone-in to Phara Dar's lair",
+ "menu_name": "Veeshan's Peak",
+ "waypoints": [
+  [
+   60,
+   1695
+  ],
+  [
+   260,
+   1695
+  ],
+  [
+   520,
+   1700
+  ],
+  [
+   790,
+   1700
+  ],
+  [
+   790,
+   1420
+  ],
+  [
+   795,
+   1130
+  ],
+  [
+   795,
+   900
+  ],
+  [
+   900,
+   815
+  ],
+  [
+   1050,
+   800
+  ],
+  [
+   1070,
+   650
+  ],
+  [
+   1085,
+   545
+  ],
+  [
+   1175,
+   512
+  ],
+  [
+   1312,
+   540
+  ],
+  [
+   1175,
+   512
+  ],
+  [
+   1085,
+   560
+  ],
+  [
+   1068,
+   660
+  ],
+  [
+   1050,
+   790
+  ],
+  [
+   900,
+   820
+  ],
+  [
+   795,
+   900
+  ],
+  [
+   715,
+   1015
+  ],
+  [
+   620,
+   1078
+  ],
+  [
+   500,
+   1020
+  ],
+  [
+   480,
+   900
+  ],
+  [
+   462,
+   760
+  ],
+  [
+   395,
+   600
+  ],
+  [
+   400,
+   470
+  ],
+  [
+   470,
+   380
+  ],
+  [
+   470,
+   290
+  ],
+  [
+   420,
+   215
+  ],
+  [
+   300,
+   195
+  ],
+  [
+   160,
+   195
+  ],
+  [
+   40,
+   200
+  ],
+  [
+   -60,
+   300
+  ],
+  [
+   -180,
+   300
+  ],
+  [
+   -300,
+   190
+  ],
+  [
+   -460,
+   170
+  ],
+  [
+   -480,
+   40
+  ],
+  [
+   -420,
+   -60
+  ],
+  [
+   -270,
+   -85
+  ],
+  [
+   -130,
+   -115
+  ],
+  [
+   -40,
+   -190
+  ],
+  [
+   -35,
+   -320
+  ],
+  [
+   40,
+   -395
+  ],
+  [
+   138,
+   -470
+  ],
+  [
+   138,
+   -620
+  ],
+  [
+   200,
+   -705
+  ],
+  [
+   300,
+   -765
+  ],
+  [
+   320,
+   -880
+  ],
+  [
+   320,
+   -935
+  ],
+  [
+   100,
+   -955
+  ],
+  [
+   -120,
+   -960
+  ],
+  [
+   -185,
+   -1060
+  ],
+  [
+   -190,
+   -1220
+  ],
+  [
+   -280,
+   -1300
+  ],
+  [
+   -420,
+   -1300
+  ],
+  [
+   -525,
+   -1060
+  ],
+  [
+   -610,
+   -990
+  ],
+  [
+   -669,
+   -1000
+  ],
+  [
+   -720,
+   -1010
+  ],
+  [
+   -780,
+   -1110
+  ],
+  [
+   -920,
+   -1150
+  ],
+  [
+   -1023,
+   -1160
+  ],
+  [
+   -1080,
+   -1185
+  ],
+  [
+   -1170,
+   -1290
+  ]
+ ],
+ "half_width": 24,
+ "avoid": [
+  "velavaf1.bmp",
+  "veelava1.bmp",
+  "vlavaf01.bmp",
+  "vewater1.bmp"
+ ],
+ "laps": 1,
+ "music_zone": "templeveeshan",
+ "music3d": "templeveeshan_3.ogg",
+ "item_rows": [
+  0.2,
+  0.55,
+  0.85
+ ],
+ "course": {
+  "road": "veflor2a.bmp",
+  "kerb": "vetrim5a.bmp",
+  "barrier": "vewall2b.bmp",
+  "road_bright": 1.15
+ },
+ "npcs3d": [
+  {
+   "model": "DRK",
+   "count": 7,
+   "height": 18
+  },
+  {
+   "model": "WUR",
+   "count": 6,
+   "height": 26
+  },
+  {
+   "model": "RAP",
+   "count": 8,
+   "height": 8
+  }
+ ],
+ "scenes": [
+  {
+   "name": "Hoshkar",
+   "model": "DRA",
+   "variant": 4,
+   "height": 30,
+   "at": [
+    1444.2,
+    558.6,
+    269.9
+   ],
+   "breath": true,
+   "face_at": [
+    1312,
+    540
+   ]
+  },
+  {
+   "name": "Phara Dar",
+   "model": "DRA",
+   "variant": 6,
+   "height": 48,
+   "at": [
+    -1155.2,
+    -1306.3,
+    281.0
+   ],
+   "breath": true,
+   "face": "racers"
+  }
+ ],
+ "skirmishes": [],
+ "vignettes": [
+  {
+   "kind": "named",
+   "name": "Hoshkar",
+   "title": "Hoshkar"
+  },
+  {
+   "kind": "raid",
+   "title": "A raid on Silverwing in the pillow room",
+   "at": [
+    336.4,
+    -208.0,
+    450.8
+   ],
+   "foe": "DRA",
+   "foeVariant": 1,
+   "foeName": "Silverwing",
+   "foeHeight": 40,
+   "heroes": [
+    "pc_HUM",
+    "pc_BAM",
+    "pc_OGM",
+    "pc_DWM",
+    "pc_ERM",
+    "pc_HIF_pl",
+    "pc_DWM_pl",
+    "pc_DAF_pl",
+    "pc_ERM_pl",
+    "pc_ELF_ch",
+    "pc_GNF",
+    "pc_HOM",
+    "pc_HIF",
+    "pc_ELF",
+    "pc_DAF"
+   ],
+   "count": 18,
+   "heroHeight": 6.5,
+   "radius": 42,
+   "arc": 3.4,
+   "breath": true
+  },
+  {
+   "kind": "train",
+   "title": "A monk training racnar down the hall",
+   "at": [
+    40,
+    105,
+    360
+   ],
+   "hero": "pc_HUM_mnk",
+   "foe": "RAP",
+   "count": 7,
+   "foeHeight": 8,
+   "radius": 20,
+   "to": [
+    440,
+    105,
+    360
+   ]
+  },
+  {
+   "kind": "named",
+   "name": "Phara Dar",
+   "title": "Phara Dar"
+  }
+ ],
+ "wp_z": [
+  null,
+  null,
+  null,
+  null,
+  110,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  262,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null
+ ],
+ "open": true,
+ "plan_over": [
+  "veelava1.bmp",
+  "velavaf1.bmp",
+  "vlavaf01.bmp"
+ ],
+ "start_index": 45,
+ "runout": 14,
+ "plan_over_box": [
+  [
+   1200,
+   400
+  ],
+  [
+   1400,
+   620
+  ]
+ ],
+ "keep_objects": [
+  "VEFRAME101"
+ ],
+ "step_up": 12,
+ "roundabout": {
+  "center": [
+   1460,
+   570
+  ],
+  "radius": [
+   150,
+   185
+  ],
+  "z": 262,
+  "half_width": 24,
+  "at": [
+   1312,
+   540
+  ],
+  "from": [
+   1175,
+   512
+  ],
+  "back_to": [
+   795,
+   900
+  ]
+ },
+ "bridges": [
+  {
+   "from": [
+    140,
+    -540
+   ],
+   "to": [
+    300,
+    -765
+   ],
+   "z": 459.5,
+   "ramp": 150,
+   "half_width": 26
+  }
+ ]
+}

@@ -1,0 +1,159 @@
+{
+ "name": "lavastorm",
+ "zone": "lavastorm",
+ "title": "Lavastorm Mountains",
+ "sub": "Between the lava flows",
+ "waypoints": [
+  [
+   -950,
+   800
+  ],
+  [
+   -450,
+   950
+  ],
+  [
+   300,
+   1150
+  ],
+  [
+   650,
+   700
+  ],
+  [
+   500,
+   150
+  ],
+  [
+   800,
+   -300
+  ],
+  [
+   100,
+   -750
+  ],
+  [
+   -750,
+   -700
+  ]
+ ],
+ "half_width": 22,
+ "music_zone": "lavastorm",
+ "npcs3d": [
+  {
+   "model": "DRK",
+   "count": 3,
+   "height": 14
+  },
+  {
+   "model": "EFR",
+   "count": 2,
+   "height": 12,
+   "feature": true
+  },
+  {
+   "model": "GOB",
+   "count": 4,
+   "height": 4
+  },
+  {
+   "model": "SNA",
+   "count": 3,
+   "height": 4
+  },
+  {
+   "model": "QCM",
+   "count": 3,
+   "height": 6
+  },
+  {
+   "model": "QCF",
+   "count": 3,
+   "height": 6
+  }
+ ],
+ "course": {
+  "road": "grycon1.bmp",
+  "kerb": "wall1.bmp",
+  "road_bright": 1.15,
+  "smooth": 30,
+  "barrier": "wall1.bmp"
+ },
+ "menu_name": "Lavastorm Mountains",
+ "item_rows": [
+  0.22,
+  0.62
+ ],
+ "laps": 2,
+ "music3d": "lavastorm_0.ogg",
+ "min_floor_z": -4,
+ "skirmishes": [
+  {
+   "count": 10,
+   "heroes": [
+    "pc_HUM",
+    "pc_ELF",
+    "pc_DWM",
+    "pc_HIF",
+    "pc_BAM",
+    "pc_ERM",
+    "pc_DAF",
+    "pc_HOM",
+    "pc_OGM",
+    "pc_GNF"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "GOB"
+   ],
+   "foeHeight": 5
+  }
+ ],
+ "vignettes": [
+  {
+   "kind": "fight",
+   "title": "Drakes over the lava",
+   "along": 0.3,
+   "heroes": [
+    "pc_HUM",
+    "pc_BAM",
+    "pc_OGM",
+    "pc_DWM",
+    "pc_ERM"
+   ],
+   "foes": [
+    "DRK"
+   ],
+   "pairs": 3,
+   "heroHeight": 6.5,
+   "foeHeight": 14,
+   "radius": 22
+  },
+  {
+   "kind": "fight",
+   "title": "Young adventurers raid the goblin camp",
+   "at": [
+    -430,
+    -25,
+    106
+   ],
+   "heroes": [
+    "pc_HUM_lo",
+    "pc_DWM_lo",
+    "pc_GNF_lo",
+    "pc_BAM_lo"
+   ],
+   "foes": [
+    "GOB"
+   ],
+   "pairs": 4,
+   "heroHeight": 6,
+   "foeHeight": 4.5,
+   "radius": 12
+  },
+  {
+   "kind": "feature",
+   "title": "An efreeti in the hills"
+  }
+ ]
+}

@@ -1,0 +1,139 @@
+{
+ "name": "kael",
+ "zone": "kael",
+ "title": "Kael Drakkal",
+ "theme": "vanilla_lake",
+ "replaces_track": 12,
+ "cup_slot": 1,
+ "waypoints": [
+  [
+   1391.0,
+   1229.0
+  ],
+  [
+   1014.0,
+   1546.0
+  ],
+  [
+   1014.0,
+   1019.0
+  ]
+ ],
+ "half_width": 42,
+ "floor_reach": 60,
+ "item_rows": [
+  0.25,
+  0.65
+ ],
+ "coins": [
+  0.1,
+  0.12,
+  0.14,
+  0.45,
+  0.47,
+  0.49,
+  0.85,
+  0.87,
+  0.89
+ ],
+ "npc": {
+  "model": "STG",
+  "yaw": 0
+ },
+ "menu_name": "Kael Drakkal",
+ "music3d": "kael_3.ogg",
+ "npcs3d": [
+  {
+   "model": "STG",
+   "count": 5,
+   "height": 24
+  },
+  {
+   "model": "FSG",
+   "count": 3,
+   "height": 24
+  },
+  {
+   "model": "DIW",
+   "count": 3,
+   "height": 8
+  }
+ ],
+ "course": {
+  "road": "orangtileflo.bmp",
+  "kerb": "snow_flo.bmp",
+  "road_bright": 1.25,
+  "ramp": 3,
+  "barrier": "wal2.bmp"
+ },
+ "level_room": true,
+ "skirmishes": [
+  {
+   "at": "centroid",
+   "count": 3,
+   "heroes": [
+    "STG"
+   ],
+   "heroHeight": 24,
+   "foes": [
+    "FSG"
+   ],
+   "foeHeight": 24,
+   "feature": true
+  },
+  {
+   "count": 6,
+   "heroes": [
+    "pc_HUM",
+    "pc_ELF",
+    "pc_DWM",
+    "pc_HIF",
+    "pc_BAM",
+    "pc_ERM",
+    "pc_DAF",
+    "pc_HOM",
+    "pc_OGM",
+    "pc_GNF"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "DIW"
+   ],
+   "foeHeight": 8
+  }
+ ],
+ "vignettes": [
+  {
+   "kind": "feature",
+   "title": "Storm giants against the Kael frost giants"
+  },
+  {
+   "kind": "fight",
+   "title": "Raiders against Tormax's frost giants",
+   "along": 0.45,
+   "heroes": [
+    "pc_HUM",
+    "pc_BAM",
+    "pc_OGM",
+    "pc_DWM",
+    "pc_ERM"
+   ],
+   "foes": [
+    "FSG"
+   ],
+   "pairs": 4,
+   "heroHeight": 6.5,
+   "foeHeight": 24,
+   "radius": 24
+  },
+  {
+   "kind": "herd",
+   "title": "Storm giants in the arena",
+   "along": 0.78,
+   "model": "STG",
+   "count": 3,
+   "height": 24,
+   "radius": 30
+  }
+ ]
+}

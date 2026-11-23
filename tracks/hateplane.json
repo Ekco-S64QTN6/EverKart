@@ -1,0 +1,167 @@
+{
+ "name": "hateplane",
+ "zone": "hateplane",
+ "title": "Plane of Hate",
+ "sub": "Innoruuk's plaza and tower",
+ "waypoints": [
+  [
+   300.0,
+   140.0
+  ],
+  [
+   380.0,
+   220.0
+  ],
+  [
+   300.0,
+   300.0
+  ],
+  [
+   230.0,
+   290.0
+  ],
+  [
+   170.0,
+   160.0
+  ],
+  [
+   72.0,
+   122.0
+  ],
+  [
+   -40.0,
+   20.0
+  ],
+  [
+   10.0,
+   -110.0
+  ],
+  [
+   90.0,
+   -60.0
+  ],
+  [
+   135.0,
+   75.0
+  ],
+  [
+   200.0,
+   110.0
+  ]
+ ],
+ "half_width": 18,
+ "avoid": [],
+ "music_zone": "neriakc",
+ "npcs3d": [
+  {
+   "model": "SPE",
+   "count": 3,
+   "height": 7
+  },
+  {
+   "model": "ZOM",
+   "count": 3,
+   "height": 6
+  },
+  {
+   "model": "MIM",
+   "count": 2,
+   "height": 3
+  },
+  {
+   "model": "WIL",
+   "count": 2,
+   "height": 3
+  },
+  {
+   "model": "DVM",
+   "count": 3,
+   "height": 7
+  }
+ ],
+ "course": {
+  "road": "fpfloor1.bmp",
+  "kerb": "fpblock1.bmp",
+  "road_bright": 1.3,
+  "barrier": "fpwwall8.bmp"
+ },
+ "menu_name": "Plane of Hate",
+ "item_rows": [
+  0.22,
+  0.62
+ ],
+ "laps": 4,
+ "music3d": "neriakc_12.ogg",
+ "z_hint": 0,
+ "skirmishes": [
+  {
+   "count": 8,
+   "heroes": [
+    "pc_HUM",
+    "pc_ELF",
+    "pc_DWM",
+    "pc_HIF",
+    "pc_BAM",
+    "pc_ERM",
+    "pc_DAF",
+    "pc_HOM",
+    "pc_OGM",
+    "pc_GNF"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "ZOM"
+   ],
+   "foeHeight": 6
+  }
+ ],
+ "scenes": [
+  {
+   "model": "INN",
+   "height": 16,
+   "at": [
+    0,
+    0,
+    0
+   ],
+   "yaw": 0,
+   "feature": true,
+   "featureScale": 1.3
+  }
+ ],
+ "level_room": true,
+ "vignettes": [
+  {
+   "kind": "feature",
+   "title": "Innoruuk"
+  },
+  {
+   "kind": "fight",
+   "title": "A raid in Innoruuk's city",
+   "along": 0.5,
+   "heroes": [
+    "pc_HUM",
+    "pc_BAM",
+    "pc_OGM",
+    "pc_DWM",
+    "pc_ERM"
+   ],
+   "foes": [
+    "DVM"
+   ],
+   "pairs": 3,
+   "heroHeight": 6.5,
+   "foeHeight": 7.5,
+   "radius": 14
+  },
+  {
+   "kind": "herd",
+   "title": "The restless dead",
+   "along": 0.8,
+   "model": "ZOM",
+   "count": 4,
+   "height": 6,
+   "radius": 16
+  }
+ ]
+}

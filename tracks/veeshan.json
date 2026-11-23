@@ -1,0 +1,188 @@
+{
+ "name": "veeshan",
+ "zone": "templeveeshan",
+ "title": "Temple of Veeshan",
+ "theme": "bowser_castle",
+ "replaces_track": 7,
+ "cup_slot": 0,
+ "waypoints": [
+  [
+   -1150,
+   500
+  ],
+  [
+   -1150,
+   680
+  ],
+  [
+   -1040,
+   680
+  ],
+  [
+   -990,
+   620
+  ],
+  [
+   -890,
+   620
+  ],
+  [
+   -850,
+   680
+  ],
+  [
+   -670,
+   680
+  ],
+  [
+   -670,
+   470
+  ],
+  [
+   -800,
+   470
+  ],
+  [
+   -800,
+   320
+  ],
+  [
+   -690,
+   320
+  ],
+  [
+   -690,
+   180
+  ],
+  [
+   -790,
+   180
+  ],
+  [
+   -790,
+   60
+  ],
+  [
+   -1040,
+   60
+  ],
+  [
+   -1040,
+   310
+  ],
+  [
+   -1150,
+   310
+  ]
+ ],
+ "half_width": 28,
+ "floor_reach": 48,
+ "item_rows": [
+  0.22,
+  0.62
+ ],
+ "coins": [
+  0.1,
+  0.12,
+  0.14,
+  0.4,
+  0.42,
+  0.44,
+  0.8,
+  0.82,
+  0.84
+ ],
+ "npc": {
+  "model": "DRA",
+  "yaw": 0
+ },
+ "menu_name": "Veeshan",
+ "music3d": "templeveeshan_1.ogg",
+ "npcs3d": [
+  {
+   "model": "DRA",
+   "count": 4,
+   "height": 45,
+   "breath": true,
+   "feature": true,
+   "variants": [
+    0,
+    2,
+    6,
+    7
+   ]
+  },
+  {
+   "model": "DRK",
+   "count": 4,
+   "height": 20
+  },
+  {
+   "model": "WUR",
+   "count": 2,
+   "height": 28
+  }
+ ],
+ "course": {
+  "road": "vredmarb.bmp",
+  "kerb": "yellopla.bmp",
+  "road_bright": 2.0,
+  "barrier": "vredmarbwal2pl.bmp"
+ },
+ "skirmishes": [
+  {
+   "count": 8,
+   "heroes": [
+    "pc_HUM",
+    "pc_ELF",
+    "pc_DWM",
+    "pc_HIF",
+    "pc_BAM",
+    "pc_ERM",
+    "pc_DAF",
+    "pc_HOM",
+    "pc_OGM",
+    "pc_GNF"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "DRK"
+   ],
+   "foeHeight": 9
+  }
+ ],
+ "vignettes": [
+  {
+   "kind": "feature",
+   "title": "A dragon in its hall"
+  },
+  {
+   "kind": "fight",
+   "title": "A raid on a wurm",
+   "along": 0.35,
+   "heroes": [
+    "pc_HUM",
+    "pc_BAM",
+    "pc_OGM",
+    "pc_DWM",
+    "pc_ERM"
+   ],
+   "foes": [
+    "WUR"
+   ],
+   "pairs": 5,
+   "heroHeight": 6.5,
+   "foeHeight": 28,
+   "radius": 20
+  },
+  {
+   "kind": "herd",
+   "title": "Drakes of the temple",
+   "along": 0.7,
+   "model": "DRK",
+   "count": 3,
+   "height": 20,
+   "radius": 30
+  }
+ ]
+}

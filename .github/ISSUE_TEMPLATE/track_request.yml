@@ -1,0 +1,23 @@
+name: Track idea
+description: A zone you'd like to race through, or a better route through one
+labels: [track]
+body:
+  - type: input
+    id: zone
+    attributes:
+      label: Zone
+      placeholder: e.g. Sol B / Nagafen's Lair
+    validations:
+      required: true
+  - type: textarea
+    id: route
+    attributes:
+      label: The route
+      description: Where it starts, what it passes, where it ends - the way players who know the zone would run it.
+    validations:
+      required: true
+  - type: textarea
+    id: life
+    attributes:
+      label: Life beside the track
+      description: The named NPCs, camps, raids or sights a player expects to see there.

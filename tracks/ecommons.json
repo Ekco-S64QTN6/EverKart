@@ -1,0 +1,173 @@
+{
+ "name": "ecommons",
+ "zone": "ecommons",
+ "title": "East Commonlands",
+ "sub": "The road from the gates of Freeport",
+ "menu_name": "East Commonlands",
+ "half_width": 22,
+ "laps": 2,
+ "music_zone": "freporte",
+ "waypoints": [
+  [
+   0,
+   -600
+  ],
+  [
+   -50,
+   300
+  ],
+  [
+   -350,
+   1100
+  ],
+  [
+   -100,
+   2000
+  ],
+  [
+   -300,
+   2600
+  ],
+  [
+   600,
+   2900
+  ],
+  [
+   800,
+   1800
+  ],
+  [
+   700,
+   900
+  ],
+  [
+   450,
+   100
+  ]
+ ],
+ "course": {
+  "road": "sand.bmp",
+  "kerb": "freetop1.bmp",
+  "barrier": "freewal0.bmp",
+  "road_bright": 1.1
+ },
+ "item_rows": [
+  0.2,
+  0.55,
+  0.85
+ ],
+ "npcs3d": [
+  {
+   "model": "ORC",
+   "count": 12,
+   "height": 7
+  },
+  {
+   "model": "FPM",
+   "count": 6,
+   "height": 6
+  },
+  {
+   "model": "QCM",
+   "count": 5,
+   "height": 6
+  },
+  {
+   "model": "QCF",
+   "count": 4,
+   "height": 6
+  },
+  {
+   "model": "PUM",
+   "count": 3,
+   "height": 4
+  },
+  {
+   "model": "WOL",
+   "count": 5,
+   "height": 4
+  },
+  {
+   "model": "SNA",
+   "count": 4,
+   "height": 2
+  },
+  {
+   "model": "SPI",
+   "count": 4,
+   "height": 3
+  },
+  {
+   "model": "BET",
+   "count": 4,
+   "height": 2
+  },
+  {
+   "model": "BIX",
+   "count": 3,
+   "height": 2
+  },
+  {
+   "model": "GRI",
+   "count": 2,
+   "height": 9
+  }
+ ],
+ "vignettes": [
+  {
+   "kind": "fight",
+   "title": "Deathfist orcs raid the Commonlands road",
+   "along": 0.3,
+   "heroes": [
+    "pc_HUM_lo",
+    "pc_ERM_lo",
+    "pc_DAF_lo",
+    "pc_OGM_lo",
+    "pc_BAM_lo"
+   ],
+   "foes": [
+    "ORC"
+   ],
+   "pairs": 4,
+   "heroHeight": 6,
+   "foeHeight": 7,
+   "radius": 18
+  },
+  {
+   "kind": "fight",
+   "title": "The Freeport militia drive off the orcs",
+   "along": 0.65,
+   "heroes": [
+    "FPM"
+   ],
+   "foes": [
+    "ORC"
+   ],
+   "pairs": 3,
+   "heroHeight": 6,
+   "foeHeight": 7,
+   "radius": 16
+  }
+ ],
+ "skirmishes": [
+  {
+   "count": 24,
+   "heroes": [
+    "pc_HUM",
+    "pc_ERM",
+    "pc_DAF",
+    "pc_OGM",
+    "pc_BAM",
+    "pc_HOM",
+    "pc_TRM"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "ORC"
+   ],
+   "foeHeight": 7,
+   "feature": true
+  }
+ ],
+ "music3d": "freporte_0.ogg"
+}

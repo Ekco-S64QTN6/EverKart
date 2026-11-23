@@ -1,0 +1,200 @@
+{
+ "name": "gfaydark",
+ "zone": "gfaydark",
+ "title": "Greater Faydark",
+ "theme": "mario_circuit",
+ "replaces_track": 15,
+ "cup_slot": 2,
+ "waypoints": [
+  [
+   -1000,
+   -350
+  ],
+  [
+   -1000,
+   350
+  ],
+  [
+   -650,
+   350
+  ],
+  [
+   -150,
+   350
+  ],
+  [
+   350,
+   380
+  ],
+  [
+   780,
+   380
+  ],
+  [
+   1000,
+   100
+  ],
+  [
+   850,
+   -300
+  ],
+  [
+   300,
+   -800
+  ],
+  [
+   -450,
+   -950
+  ],
+  [
+   -1000,
+   -950
+  ]
+ ],
+ "half_width": 24,
+ "floor_reach": 75,
+ "open_edges": true,
+ "ground_max_z": 60,
+ "sky_min_dist": 200,
+ "item_rows": [
+  0.2,
+  0.6
+ ],
+ "coins": [
+  0.1,
+  0.12,
+  0.14,
+  0.42,
+  0.44,
+  0.46,
+  0.8,
+  0.82,
+  0.84
+ ],
+ "npc": {
+  "model": "ORC",
+  "yaw": 0
+ },
+ "scenery_dim": 0.45,
+ "menu_name": "Greater Faydark",
+ "music3d": "gfaydark_4.ogg",
+ "npcs3d": [
+  {
+   "model": "ORC",
+   "count": 14,
+   "height": 7
+  },
+  {
+   "model": "GFM",
+   "count": 14,
+   "height": 6
+  },
+  {
+   "model": "WOL",
+   "count": 7,
+   "height": 5
+  },
+  {
+   "model": "UNI",
+   "count": 2,
+   "height": 10
+  },
+  {
+   "model": "FAF",
+   "count": 7,
+   "height": 4
+  },
+  {
+   "model": "TRE",
+   "count": 2,
+   "height": 24,
+   "wander": true
+  },
+  {
+   "model": "DRI",
+   "count": 7,
+   "height": 6
+  },
+  {
+   "model": "BAT",
+   "count": 3,
+   "height": 3
+  }
+ ],
+ "laps": 2,
+ "course": {
+  "road": "1dirtfloor.bmp",
+  "kerb": "citystone.bmp",
+  "road_bright": 1.5,
+  "barrier": "felwood.bmp"
+ },
+ "skirmishes": [
+  {
+   "count": 40,
+   "heroes": [
+    "pc_HUM",
+    "pc_ELF",
+    "pc_DWM",
+    "pc_HIF",
+    "pc_BAM",
+    "pc_ERM",
+    "pc_DAF",
+    "pc_HOM",
+    "pc_OGM",
+    "pc_GNF"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "ORC"
+   ],
+   "foeHeight": 7,
+   "feature": true
+  }
+ ],
+ "vignettes": [
+  {
+   "kind": "fight",
+   "title": "Crushbone orcs raid the forest",
+   "along": 0.25,
+   "heroes": [
+    "pc_ELF_lo",
+    "pc_HUM_lo",
+    "pc_DWM_lo",
+    "pc_GNF_lo",
+    "pc_BAM_lo",
+    "pc_HIF_lo"
+   ],
+   "foes": [
+    "ORC"
+   ],
+   "pairs": 4,
+   "heroHeight": 6,
+   "foeHeight": 7,
+   "radius": 18
+  },
+  {
+   "kind": "fight",
+   "title": "Kelethin's guards drive off the orcs",
+   "along": 0.55,
+   "heroes": [
+    "GFM"
+   ],
+   "foes": [
+    "ORC"
+   ],
+   "pairs": 3,
+   "heroHeight": 6,
+   "foeHeight": 7,
+   "radius": 16
+  },
+  {
+   "kind": "herd",
+   "title": "A unicorn in the glade",
+   "along": 0.8,
+   "model": "UNI",
+   "count": 2,
+   "height": 10,
+   "radius": 25
+  }
+ ]
+}

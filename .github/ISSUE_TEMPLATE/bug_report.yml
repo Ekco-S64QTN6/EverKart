@@ -1,0 +1,55 @@
+name: Bug report
+description: Something is broken - a crash, a glitch on a track, a build that fails
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please don't attach EverQuest files or builds of the game.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to make it happen
+      placeholder: |
+        1. Race Veeshan's Peak as an Ogre
+        2. Drive into the octagon hall
+        3. ...
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options:
+        - Installing / building
+        - A track (say which below)
+        - Menus
+        - Racing (karts, items, CPU racers)
+        - Something else
+    validations:
+      required: true
+  - type: input
+    id: track
+    attributes:
+      label: Track
+      placeholder: e.g. Veeshan's Peak, around the pillow room
+  - type: input
+    id: system
+    attributes:
+      label: System
+      placeholder: e.g. Arch Linux, AMD RX 6700 / Windows 11, GTX 1660
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: |
+        The newest log file: Linux `~/.config/EverKart/logs/`, Windows `%APPDATA%\EverKart\logs\`.
+        For a failed build, the installer's last messages.
+      render: text

@@ -1,0 +1,190 @@
+{
+ "name": "oasis",
+ "zone": "oasis",
+ "title": "Oasis of Marr",
+ "sub": "Around the oasis, across the dunes",
+ "waypoints": [
+  [
+   -1300,
+   -600
+  ],
+  [
+   -1300,
+   600
+  ],
+  [
+   -1000,
+   1150
+  ],
+  [
+   -300,
+   1150
+  ],
+  [
+   350,
+   900
+  ],
+  [
+   450,
+   250
+  ],
+  [
+   300,
+   -500
+  ],
+  [
+   -200,
+   -800
+  ],
+  [
+   -800,
+   -800
+  ]
+ ],
+ "half_width": 30,
+ "avoid": [
+  "seafloor.bmp",
+  "w1.bmp"
+ ],
+ "music_zone": "nro",
+ "npcs3d": [
+  {
+   "model": "ALL",
+   "count": 5,
+   "height": 6
+  },
+  {
+   "model": "DER",
+   "count": 3,
+   "height": 6
+  },
+  {
+   "model": "GIA",
+   "count": 4,
+   "height": 24,
+   "wander": true
+  }
+ ],
+ "course": {
+  "road": "mtfloor.bmp",
+  "kerb": "mtwalltop.bmp",
+  "road_bright": 1.2,
+  "barrier": "canwall1.bmp"
+ },
+ "menu_name": "Oasis of Marr",
+ "item_rows": [
+  0.22,
+  0.62
+ ],
+ "laps": 2,
+ "music3d": "nro_0.ogg",
+ "scenes": [
+  {
+   "model": "SPE",
+   "height": 13,
+   "at": [
+    -345,
+    445
+   ],
+   "yaw": -135,
+   "feature": true,
+   "featureScale": 4.5
+  },
+  {
+   "model": "SPE",
+   "height": 13,
+   "at": [
+    -415,
+    445
+   ],
+   "yaw": 135,
+   "feature": true,
+   "featureScale": 4.5
+  },
+  {
+   "model": "SPE",
+   "height": 13,
+   "at": [
+    -415,
+    375
+   ],
+   "yaw": 45,
+   "feature": true,
+   "featureScale": 4.5
+  },
+  {
+   "model": "SPE",
+   "height": 13,
+   "at": [
+    -345,
+    375
+   ],
+   "yaw": -45,
+   "feature": true,
+   "featureScale": 4.5
+  }
+ ],
+ "skirmishes": [
+  {
+   "count": 10,
+   "heroes": [
+    "pc_HUM",
+    "pc_ELF",
+    "pc_DWM",
+    "pc_HIF",
+    "pc_BAM",
+    "pc_ERM",
+    "pc_DAF",
+    "pc_HOM",
+    "pc_OGM",
+    "pc_GNF"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "ALL",
+    "DER"
+   ],
+   "foeHeight": 6
+  }
+ ],
+ "steep_walls": true,
+ "vignettes": [
+  {
+   "kind": "fight",
+   "title": "Crocodiles on the beach",
+   "at": [
+    -400,
+    -270
+   ],
+   "heroes": [
+    "pc_HUM_lo",
+    "pc_ELF_lo",
+    "pc_DWM_lo",
+    "pc_GNF_lo"
+   ],
+   "foes": [
+    "ALL"
+   ],
+   "pairs": 4,
+   "heroHeight": 6,
+   "foeHeight": 5,
+   "radius": 12
+  },
+  {
+   "kind": "kite",
+   "title": "Running from a sand giant",
+   "at": [
+    1150,
+    250
+   ],
+   "hero": "pc_HIF_lo",
+   "foe": "GIA",
+   "foeHeight": 26,
+   "radius": 45
+  },
+  {
+   "kind": "feature",
+   "title": "The spectres of the island tower"
+  }
+ ]
+}

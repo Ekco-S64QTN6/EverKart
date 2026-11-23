@@ -1,0 +1,157 @@
+{
+ "name": "unrest",
+ "zone": "unrest",
+ "title": "Estate of Unrest",
+ "sub": "Round the haunted mansion",
+ "menu_name": "Estate of Unrest",
+ "waypoints": [
+  [
+   620,
+   250
+  ],
+  [
+   860,
+   200
+  ],
+  [
+   880,
+   -60
+  ],
+  [
+   820,
+   -170
+  ],
+  [
+   600,
+   -170
+  ],
+  [
+   430,
+   -150
+  ],
+  [
+   412,
+   -80
+  ],
+  [
+   412,
+   60
+  ],
+  [
+   425,
+   150
+  ],
+  [
+   460,
+   235
+  ]
+ ],
+ "half_width": 16,
+ "avoid": [
+  "underwater1.bmp"
+ ],
+ "laps": 4,
+ "music_zone": "eerie",
+ "music3d": "eerie_2.ogg",
+ "item_rows": [
+  0.22,
+  0.62
+ ],
+ "course": {
+  "road": "sidewalk.bmp",
+  "kerb": "newbrickwall.bmp",
+  "road_bright": 1.2,
+  "barrier": "newbrickwall.bmp"
+ },
+ "npcs3d": [
+  {
+   "model": "GHU",
+   "count": 8,
+   "height": 6.5
+  },
+  {
+   "model": "ZOM",
+   "count": 6,
+   "height": 6
+  },
+  {
+   "model": "SPE",
+   "count": 3,
+   "height": 7
+  },
+  {
+   "model": "IMP",
+   "count": 3,
+   "height": 3
+  },
+  {
+   "model": "BET",
+   "count": 3,
+   "height": 3
+  }
+ ],
+ "scenes": [],
+ "skirmishes": [
+  {
+   "count": 6,
+   "heroes": [
+    "pc_HUM_lo",
+    "pc_ELF_lo",
+    "pc_DWM_lo",
+    "pc_BAM_lo"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "GHU",
+    "ZOM"
+   ],
+   "foeHeight": 6.5
+  }
+ ],
+ "vignettes": [
+  {
+   "kind": "fight",
+   "title": "Ghouls in the courtyard",
+   "along": 0.25,
+   "heroes": [
+    "pc_ELF_lo",
+    "pc_HIF_lo",
+    "pc_HUM_lo",
+    "pc_GNF_lo",
+    "pc_DWM_lo"
+   ],
+   "foes": [
+    "GHU"
+   ],
+   "pairs": 4,
+   "heroHeight": 6,
+   "foeHeight": 6.5,
+   "radius": 18
+  },
+  {
+   "kind": "kite",
+   "title": "Kiting zombies round the gazebo",
+   "at": [
+    500,
+    -270
+   ],
+   "hero": "pc_HUM_lo",
+   "foe": "ZOM",
+   "foeHeight": 6.5,
+   "radius": 22
+  },
+  {
+   "kind": "herd",
+   "title": "Spectres haunt the mansion",
+   "at": [
+    640,
+    205
+   ],
+   "model": "SPE",
+   "count": 3,
+   "height": 7,
+   "radius": 22
+  }
+ ],
+ "auto_start": false
+}

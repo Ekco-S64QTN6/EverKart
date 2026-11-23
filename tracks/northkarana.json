@@ -1,0 +1,192 @@
+{
+ "name": "northkarana",
+ "zone": "northkarana",
+ "title": "North Karana",
+ "sub": "Across the plains to the druid circle",
+ "menu_name": "North Karana",
+ "half_width": 22,
+ "laps": 2,
+ "music_zone": "northkarana",
+ "waypoints": [
+  [
+   -350,
+   -500
+  ],
+  [
+   -150,
+   -1300
+  ],
+  [
+   -1200,
+   -1600
+  ],
+  [
+   -2550,
+   -1250
+  ],
+  [
+   -2700,
+   -300
+  ],
+  [
+   -2300,
+   350
+  ],
+  [
+   -1600,
+   -250
+  ],
+  [
+   -900,
+   -500
+  ]
+ ],
+ "course": {
+  "road": "drymud1.bmp",
+  "kerb": "hhdrock.bmp",
+  "barrier": "pier2.bmp",
+  "road_bright": 1.2
+ },
+ "item_rows": [
+  0.2,
+  0.55,
+  0.85
+ ],
+ "npcs3d": [
+  {
+   "model": "BGM",
+   "count": 8,
+   "height": 6
+  },
+  {
+   "model": "GIA",
+   "count": 3,
+   "height": 14
+  },
+  {
+   "model": "GRI",
+   "count": 4,
+   "height": 9
+  },
+  {
+   "model": "LIM",
+   "count": 2,
+   "height": 5
+  },
+  {
+   "model": "LIF",
+   "count": 3,
+   "height": 5
+  },
+  {
+   "model": "WOL",
+   "count": 8,
+   "height": 4
+  },
+  {
+   "model": "BEA",
+   "count": 3,
+   "height": 6
+  },
+  {
+   "model": "CEN",
+   "count": 3,
+   "height": 9
+  },
+  {
+   "model": "QCM",
+   "count": 5,
+   "height": 6
+  },
+  {
+   "model": "QCF",
+   "count": 3,
+   "height": 6
+  },
+  {
+   "model": "BET",
+   "count": 4,
+   "height": 2
+  },
+  {
+   "model": "WIL",
+   "count": 3,
+   "height": 3
+  },
+  {
+   "model": "TRE",
+   "count": 2,
+   "height": 24,
+   "wander": true
+  }
+ ],
+ "vignettes": [
+  {
+   "kind": "fight",
+   "title": "A gnoll raiding party on the Karana road",
+   "along": 0.3,
+   "heroes": [
+    "pc_HUM_lo",
+    "pc_BAM_lo",
+    "pc_HIF_lo",
+    "pc_ELF_lo",
+    "pc_HOM_lo"
+   ],
+   "foes": [
+    "BGM"
+   ],
+   "pairs": 4,
+   "heroHeight": 6,
+   "foeHeight": 6,
+   "radius": 18
+  },
+  {
+   "kind": "fight",
+   "title": "Adventurers take on a hill giant",
+   "along": 0.6,
+   "heroes": [
+    "pc_HUM_lo",
+    "pc_DWM_lo",
+    "pc_BAM_lo",
+    "pc_ERM_lo"
+   ],
+   "foes": [
+    "GIA"
+   ],
+   "pairs": 1,
+   "heroHeight": 6,
+   "foeHeight": 14,
+   "radius": 22
+  },
+  {
+   "kind": "herd",
+   "title": "Lions on the plains",
+   "along": 0.8,
+   "model": "LIF",
+   "count": 3,
+   "height": 5,
+   "radius": 25
+  }
+ ],
+ "skirmishes": [
+  {
+   "count": 20,
+   "heroes": [
+    "pc_HUM",
+    "pc_BAM",
+    "pc_HIF",
+    "pc_ELF",
+    "pc_HOM",
+    "pc_ERM",
+    "pc_DWM"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "BGM"
+   ],
+   "foeHeight": 6,
+   "feature": true
+  }
+ ],
+ "music3d": "northkarana_1.ogg"
+}

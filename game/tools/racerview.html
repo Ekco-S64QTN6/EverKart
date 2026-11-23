@@ -1,0 +1,55 @@
+<!doctype html>
+<!-- One racer seated in a kart: from the front (is the face the right way up, looking ahead?), the
+     side (seated low in the hull, legs inside it?), three-quarter, from behind at the race camera's
+     height, and the face close up. tools/racer_sheet.mjs runs it over every racer.
+     http://localhost:5199/tools/racerview.html?racer=HUM_3 -->
+<html><head><meta charset="utf-8"><base href="/"><title>Racer view</title>
+<style>body{margin:0;background:#1a1410;color:#eee;font:14px sans-serif} #label{position:fixed;left:8px;top:6px}</style></head>
+<body><div id="label"></div><script type="module">
+import * as THREE from 'three';
+import { Kart, seatDriver } from '/src/kart.js';
+const W = 1500, H = 300;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.setScissorTest(true);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x2c231b);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x443322, 1.5));
+const sun = new THREE.DirectionalLight(0xffffff, 1.3);
+sun.position.set(6, 12, -10);
+scene.add(sun);
+// front (the kart faces -z), side, three-quarter, behind (the race camera), the face close up
+const VIEWS = [[[0, 4.5, -15], [0, 3.6, 0.6], 34], [[16, 4, 0.6], [0, 3.6, 0.6], 34], [[11, 8, -11], [0, 3.6, 0.6], 34],
+  [[0, 7.5, 15], [0, 3.6, -2], 50], ['face', null, 24]];
+const R = await (await fetch('/drivers/index.json')).json();
+let kart = null;
+window.show = async (code, armor) => {
+  if (kart) scene.remove(kart.mesh);
+  const info = R.find((r) => r.code === code);
+  kart = new Kart(0xc0392b, code);
+  await seatDriver(kart, { code, armor }, info);
+  scene.add(kart.mesh);
+  document.getElementById('label').textContent = `${code}_${armor} ${info?.race || ''} ${info?.gender || ''}`;
+  // the head: the top of the driver's mesh, a little down
+  const box = new THREE.Box3();
+  kart.mesh.updateMatrixWorld(true);
+  kart.mesh.traverse((o) => { if (o.isMesh && o.parent !== kart.mesh && !o.geometry.parameters) box.expandByObject(o); });
+  const head = new THREE.Vector3((box.min.x + box.max.x) / 2, box.max.y - 0.7, box.min.z + 0.2);
+  const n = VIEWS.length;
+  VIEWS.forEach(([p, at, fov], i) => {
+    const cam = new THREE.PerspectiveCamera(fov, W / n / H, 0.1, 200);
+    if (p === 'face') { cam.position.set(head.x, head.y + 0.3, head.z - 5); cam.lookAt(head); }
+    else { cam.position.set(...p); cam.lookAt(...at); }
+    renderer.setViewport((i * W) / n, 0, W / n, H);
+    renderer.setScissor((i * W) / n, 0, W / n, H);
+    renderer.render(scene, cam);
+  });
+  return true;
+};
+window.racers = R.flatMap((r) => r.armors.map((a) => [r.code, a.id]));
+const q = new URLSearchParams(location.search).get('racer');
+if (q) { const [c, a] = q.split('_'); window.show(c, +a); }
+window.ready = true;
+</script></body></html>

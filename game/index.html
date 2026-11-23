@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EverKart</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root { --gold: #e8c06a; --gold-dim: #a8853f; --ink: #f3e6c4; --panel: rgba(28, 18, 8, .78); }
+    html, body { margin: 0; height: 100%; background: #000; overflow: hidden; font-family: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; color: var(--ink); }
+    canvas { display: block; }
+    .panel { background: var(--panel); border: 2px solid var(--gold-dim); border-radius: 6px; box-shadow: 0 0 0 1px #000, inset 0 0 18px rgba(0,0,0,.6); }
+
+    /* ---------- HUD ---------- */
+    #hud { position: fixed; inset: 0; pointer-events: none; text-shadow: 2px 2px 0 #000; }
+    #hud[hidden] { display: none; }
+    #hud.intro > :not(#msg) { visibility: hidden; }   /* the race intro: only the track's name */
+    #racebox { position: absolute; top: 14px; left: 16px; padding: 8px 16px; min-width: 170px; }
+    #lap { font-size: 26px; color: var(--gold); letter-spacing: 1px; }
+    #time { font-size: 20px; font-variant-numeric: tabular-nums; }
+    #best { font-size: 14px; opacity: .8; }
+    #pos { position: absolute; top: 8px; right: 22px; font-size: 76px; font-weight: bold; color: var(--gold);
+           text-shadow: 3px 3px 0 #000, -1px -1px 0 #000; }
+    #pos small { font-size: 34px; }
+    #item { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 92px; height: 92px; padding: 6px;
+            display: flex; align-items: center; justify-content: center; }
+    #item img { width: 80px; height: 80px; image-rendering: pixelated; border: 2px solid #000; }
+    #item span { position: absolute; top: 108px; white-space: nowrap; font-size: 16px; }
+    #item .hint { opacity: .55; font-size: 13px; position: static; }
+    #msg { position: absolute; top: 34%; width: 100%; text-align: center; font-size: 84px; font-weight: bold; color: var(--gold);
+           text-shadow: 4px 4px 0 #000, -2px -2px 0 #000; }
+    #title { position: absolute; bottom: 14px; left: 18px; font-size: 18px; padding: 6px 14px; }
+    #minimap { position: absolute; right: 16px; bottom: 16px; }
+    #feed { position: absolute; left: 18px; top: 128px; font-size: 19px; line-height: 1.5; text-shadow: 2px 2px 0 #000; }
+    #feed div { transition: opacity .6s; }
+    #feed .you { color: var(--gold); }
+
+    #results[hidden], #pause[hidden] { display: none; }
+    h2 { color: var(--gold); font-weight: normal; letter-spacing: 3px; margin: 6px 0; text-align: center; }
+    #results, #pause { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+                       gap: 10px; background: rgba(0,0,0,.55); z-index: 5; }
+    #standings { border-collapse: collapse; font-size: 22px; min-width: 560px; }
+    #standings td { padding: 5px 16px; border-bottom: 1px solid rgba(168,133,63,.35); }
+    #standings tr.you td { color: var(--gold); }
+    #standings td:first-child { width: 40px; text-align: right; color: var(--gold); }
+    #standings td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+    .buttons { display: flex; gap: 12px; margin-top: 14px; }
+    .buttons button, #pause button { font: inherit; font-size: 21px; min-width: 200px; padding: 9px 16px; background: #3b2a14; color: var(--ink);
+             border: 2px solid var(--gold-dim); cursor: pointer; border-radius: 4px; }
+    .buttons button:focus, .buttons button:hover, #pause button:focus, #pause button:hover { background: #5c4220; border-color: var(--gold); outline: none; }
+    #pause h2 { font-size: 48px; }
+    #pause button { width: 300px; }
+  </style>
+</head>
+<body>
+  <div id="pause" hidden>
+    <h2>Paused</h2>
+    <button data-act="resume">Resume</button>
+    <button data-act="restart">Restart race</button>
+    <button data-act="title">Main menu</button>
+    <button data-act="quit">Quit game</button>
+  </div>
+  <div id="results" hidden>
+    <h2 style="font-size:46px">Race results</h2>
+    <table id="standings" class="panel"></table>
+    <div class="buttons"><button data-act="again">Race again</button><button data-act="next">Next track</button><button data-act="title">Main menu</button></div>
+  </div>
+  <div id="hud" hidden>
+    <div id="racebox" class="panel"><div id="lap"></div><div id="time"></div><div id="best"></div></div>
+    <div id="item" class="panel"><span class="hint">no spell</span></div>
+    <div id="pos"></div><div id="msg"></div><div id="title" class="panel"></div><div id="feed"></div>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

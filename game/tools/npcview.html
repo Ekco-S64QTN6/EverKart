@@ -1,0 +1,64 @@
+<!doctype html>
+<!-- Dev tool: every exported NPC model, each animation clip at a few moments, in a grid.
+     http://localhost:5199/tools/npcview.html?models=pc_BAM,gfaydark_GFM&clips=P01,O01,C01
+     (models default to the pc_* skirmish heroes; window.__done is set when drawn) -->
+<html><head><meta charset="utf-8"><style>body{margin:0;background:#3c3c3c}</style></head>
+<body><script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+const q = new URLSearchParams(location.search);
+const models = (q.get('models') || 'pc_HUM,pc_ELF,pc_DWM,pc_HIF,pc_BAM,pc_ERM,pc_DAF,pc_HOM,pc_OGM,pc_GNF').split(',');
+const clips = (q.get('clips') || 'P01,O01,L01,L02,C01,C02').split(',');
+const moments = (q.get('t') || '0,0.33,0.66').split(',').map(Number);
+const S = parseFloat(q.get('s') || '1');
+const CW = Math.round(96 * S), CH = Math.round(128 * S);
+const views = (q.get('yaw') || '25').split(',').map((d) => THREE.MathUtils.degToRad(+d));   // 0 = front
+const wrap = parseInt(q.get('wrap') || '1', 10);                                             // models per row
+const per = clips.length * moments.length * views.length;
+const rows = Math.ceil(models.length / wrap);
+const renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
+renderer.setSize(CW * per * wrap, CH * rows);
+renderer.setScissorTest(true);
+document.body.appendChild(renderer.domElement);
+renderer.setClearColor(0x3c3c3c);
+renderer.clear();
+const loader = new GLTFLoader();
+for (let r = 0; r < models.length; r++) {
+  const gltf = await loader.loadAsync(`../${q.get("dir") || "npcs"}/${models[r]}.glb`).catch(() => null);
+  if (!gltf) continue;
+  const scene = new THREE.Scene();
+  scene.add(new THREE.AmbientLight(0xffffff, 1.2), new THREE.DirectionalLight(0xffffff, 1.5));
+  const root = gltf.scene;
+  let h = 1;
+  root.traverse((o) => { if (o.userData?.height) h = o.userData.height; if (o.isMesh) o.frustumCulled = false; });
+  scene.add(root);
+  const mixer = new THREE.AnimationMixer(root);
+  const cam = new THREE.PerspectiveCamera(30, CW / CH, 0.1, 1000);
+  for (let c = 0; c < clips.length; c++) {
+    const clip = gltf.animations.find((a) => a.name === clips[c]);
+    for (let m = 0; m < moments.length; m++) {
+      mixer.stopAllAction();
+      if (clip) { const a = mixer.clipAction(clip); a.play(); mixer.setTime(clip.duration * moments[m]); }
+      else mixer.setTime(0);
+      root.updateMatrixWorld(true);
+      const box = new THREE.Box3();
+      root.traverse((o) => { if (o.isBone) box.expandByPoint(new THREE.Vector3().setFromMatrixPosition(o.matrixWorld)); });
+      const cy = box.isEmpty() ? h * 0.5 : (box.min.y + box.max.y) / 2;
+      for (let v = 0; v < views.length; v++) {
+        // models face -z: yaw 0 looks at the face
+        const far = parseFloat(q.get("far") || "2.1");
+        cam.position.set(Math.sin(views[v]) * h * far, cy + h * (parseFloat(q.get("up") || "0.2")), -Math.cos(views[v]) * h * far);
+        cam.lookAt(0, cy, 0);
+        const cell = (r % wrap) * per + (c * moments.length + m) * views.length + v;
+        const x = cell * CW, y = (rows - 1 - Math.floor(r / wrap)) * CH;
+        renderer.setViewport(x, y, CW, CH);
+        renderer.setScissor(x, y, CW, CH);
+        renderer.setClearColor(clip ? 0x3c3c3c : 0x602020);
+        renderer.clear();
+        renderer.render(scene, cam);
+      }
+    }
+  }
+}
+window.__done = true;
+</script></body></html>

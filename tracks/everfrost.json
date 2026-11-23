@@ -1,0 +1,166 @@
+{
+ "name": "everfrost",
+ "zone": "everfrost",
+ "title": "Everfrost Peaks",
+ "sub": "Under the ice peaks",
+ "waypoints": [
+  [
+   -900,
+   -2250
+  ],
+  [
+   -300,
+   -1950
+  ],
+  [
+   450,
+   -2050
+  ],
+  [
+   650,
+   -1750
+  ],
+  [
+   1150,
+   -1450
+  ],
+  [
+   1500,
+   -1900
+  ],
+  [
+   1100,
+   -2600
+  ],
+  [
+   200,
+   -2700
+  ],
+  [
+   -600,
+   -2700
+  ]
+ ],
+ "half_width": 28,
+ "music_zone": "halas",
+ "npcs3d": [
+  {
+   "model": "MAM",
+   "count": 3,
+   "height": 20,
+   "feature": true,
+   "wander": true
+  },
+  {
+   "model": "WOL",
+   "count": 4,
+   "height": 5
+  },
+  {
+   "model": "BEA",
+   "count": 3,
+   "height": 9
+  },
+  {
+   "model": "GOB",
+   "count": 3,
+   "height": 4
+  },
+  {
+   "model": "GIA",
+   "count": 3,
+   "height": 24,
+   "wander": true
+  }
+ ],
+ "course": {
+  "road": "justdirt.bmp",
+  "kerb": "wice1.bmp",
+  "road_bright": 1.1,
+  "barrier": "keepwall.bmp"
+ },
+ "menu_name": "Everfrost Peaks",
+ "item_rows": [
+  0.22,
+  0.62
+ ],
+ "laps": 2,
+ "music3d": "halas_5.ogg",
+ "skirmishes": [
+  {
+   "count": 10,
+   "heroes": [
+    "pc_HUM",
+    "pc_ELF",
+    "pc_DWM",
+    "pc_HIF",
+    "pc_BAM",
+    "pc_ERM",
+    "pc_DAF",
+    "pc_HOM",
+    "pc_OGM",
+    "pc_GNF"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "GOB",
+    "WOL"
+   ],
+   "foeHeight": 5
+  }
+ ],
+ "vignettes": [
+  {
+   "kind": "fight",
+   "title": "Farming ice giants at the fort by Permafrost",
+   "at": [
+    1880,
+    -6630
+   ],
+   "heroes": [
+    "pc_HUM",
+    "pc_BAM",
+    "pc_OGM"
+   ],
+   "foes": [
+    "GIA"
+   ],
+   "pairs": 3,
+   "heroHeight": 6.5,
+   "foeHeight": 22,
+   "radius": 30
+  },
+  {
+   "kind": "herd",
+   "title": "Mammoths on the tundra",
+   "at": [
+    700,
+    -3000
+   ],
+   "model": "MAM",
+   "count": 4,
+   "height": 16,
+   "radius": 70
+  },
+  {
+   "kind": "fight",
+   "title": "Goblin igloos in the maze near Halas",
+   "at": [
+    130,
+    1000
+   ],
+   "heroes": [
+    "pc_BAM_lo",
+    "pc_HUM_lo",
+    "pc_DWM_lo"
+   ],
+   "foes": [
+    "GOB"
+   ],
+   "pairs": 3,
+   "heroHeight": 6,
+   "foeHeight": 5,
+   "radius": 22
+  }
+ ]
+}

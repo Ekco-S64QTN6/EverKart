@@ -1,0 +1,200 @@
+{
+ "name": "butcher",
+ "zone": "butcher",
+ "title": "Butcherblock Mountains",
+ "sub": "From the docks to the gates of Kaladim",
+ "menu_name": "Butcherblock",
+ "half_width": 22,
+ "laps": 2,
+ "music_zone": "butcher",
+ "waypoints": [
+  [
+   1300,
+   2000
+  ],
+  [
+   950,
+   1540
+  ],
+  [
+   880,
+   830
+  ],
+  [
+   1600,
+   820
+  ],
+  [
+   2300,
+   450
+  ],
+  [
+   2750,
+   0
+  ],
+  [
+   2780,
+   -300
+  ],
+  [
+   2300,
+   -850
+  ],
+  [
+   1700,
+   -450
+  ],
+  [
+   1350,
+   -290
+  ],
+  [
+   1100,
+   -620
+  ],
+  [
+   660,
+   -640
+  ],
+  [
+   200,
+   -100
+  ],
+  [
+   20,
+   400
+  ],
+  [
+   140,
+   1100
+  ],
+  [
+   100,
+   1900
+  ],
+  [
+   600,
+   2330
+  ]
+ ],
+ "course": {
+  "road": "justdirt.bmp",
+  "kerb": "kped1.bmp",
+  "barrier": "dock.bmp",
+  "road_bright": 1.2
+ },
+ "item_rows": [
+  0.2,
+  0.55,
+  0.85
+ ],
+ "npcs3d": [
+  {
+   "model": "ORC",
+   "count": 14,
+   "height": 7
+  },
+  {
+   "model": "KAM",
+   "count": 6,
+   "height": 4.5
+  },
+  {
+   "model": "KAF",
+   "count": 3,
+   "height": 4.5
+  },
+  {
+   "model": "BRM",
+   "count": 4,
+   "height": 2.5
+  },
+  {
+   "model": "BRF",
+   "count": 3,
+   "height": 2.5
+  },
+  {
+   "model": "AVI",
+   "count": 5,
+   "height": 5
+  },
+  {
+   "model": "BET",
+   "count": 6,
+   "height": 2
+  },
+  {
+   "model": "SNA",
+   "count": 4,
+   "height": 2
+  },
+  {
+   "model": "SPI",
+   "count": 4,
+   "height": 3
+  },
+  {
+   "model": "BAT",
+   "count": 3,
+   "height": 3
+  }
+ ],
+ "vignettes": [
+  {
+   "kind": "fight",
+   "title": "Crushbone orcs ambush travellers on the road",
+   "along": 0.3,
+   "heroes": [
+    "pc_DWM_lo",
+    "pc_GNF_lo",
+    "pc_HUM_lo",
+    "pc_HIF_lo",
+    "pc_BAM_lo"
+   ],
+   "foes": [
+    "ORC"
+   ],
+   "pairs": 4,
+   "heroHeight": 6,
+   "foeHeight": 7,
+   "radius": 18
+  },
+  {
+   "kind": "fight",
+   "title": "Kaladim's guards drive off the orcs",
+   "along": 0.65,
+   "heroes": [
+    "KAM"
+   ],
+   "foes": [
+    "ORC"
+   ],
+   "pairs": 3,
+   "heroHeight": 4.5,
+   "foeHeight": 7,
+   "radius": 16
+  }
+ ],
+ "skirmishes": [
+  {
+   "count": 24,
+   "heroes": [
+    "pc_DWM",
+    "pc_GNF",
+    "pc_HUM",
+    "pc_ELF",
+    "pc_HIF",
+    "pc_BAM",
+    "pc_HOM"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "ORC"
+   ],
+   "foeHeight": 7,
+   "feature": true
+  }
+ ],
+ "music3d": "butcher_1.ogg"
+}

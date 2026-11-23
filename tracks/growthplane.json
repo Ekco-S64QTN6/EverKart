@@ -1,0 +1,150 @@
+{
+ "name": "growthplane",
+ "zone": "growthplane",
+ "title": "Plane of Growth",
+ "sub": "Around Tunare\u2019s tree",
+ "waypoints": [
+  [
+   500,
+   -1000
+  ],
+  [
+   1300,
+   -700
+  ],
+  [
+   2200,
+   -1000
+  ],
+  [
+   2290,
+   -1760
+  ],
+  [
+   2100,
+   -2600
+  ],
+  [
+   1300,
+   -2800
+  ],
+  [
+   500,
+   -2500
+  ],
+  [
+   300,
+   -1700
+  ]
+ ],
+ "half_width": 30,
+ "avoid": [],
+ "music_zone": "felwithea",
+ "npcs3d": [
+  {
+   "model": "TRE",
+   "count": 3,
+   "height": 26,
+   "wander": true
+  },
+  {
+   "model": "UNI",
+   "count": 3,
+   "height": 10
+  },
+  {
+   "model": "WOL",
+   "count": 3,
+   "height": 5
+  },
+  {
+   "model": "BEA",
+   "count": 2,
+   "height": 8
+  }
+ ],
+ "course": {
+  "road": "jung.bmp",
+  "kerb": "tolbark.bmp",
+  "road_bright": 1.3,
+  "barrier": "tolbark.bmp"
+ },
+ "menu_name": "Plane of Growth",
+ "item_rows": [
+  0.22,
+  0.62
+ ],
+ "laps": 2,
+ "music3d": "felwithea_0.ogg",
+ "object_reach": 1100,
+ "skirmishes": [
+  {
+   "count": 10,
+   "heroes": [
+    "pc_HUM",
+    "pc_ELF",
+    "pc_DWM",
+    "pc_HIF",
+    "pc_BAM",
+    "pc_ERM",
+    "pc_DAF",
+    "pc_HOM",
+    "pc_OGM",
+    "pc_GNF"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "WOL"
+   ],
+   "foeHeight": 5
+  }
+ ],
+ "scenes": [
+  {
+   "model": "TUN",
+   "height": 16,
+   "at": [
+    1300,
+    -1080
+   ],
+   "yaw": 0,
+   "feature": true,
+   "featureScale": 1.0
+  }
+ ],
+ "vignettes": [
+  {
+   "kind": "feature",
+   "title": "Tunare"
+  },
+  {
+   "kind": "fight",
+   "title": "A raid on the treants",
+   "along": 0.35,
+   "heroes": [
+    "pc_HUM",
+    "pc_BAM",
+    "pc_OGM",
+    "pc_DWM",
+    "pc_ERM"
+   ],
+   "foes": [
+    "TRE"
+   ],
+   "pairs": 3,
+   "heroHeight": 6.5,
+   "foeHeight": 26,
+   "radius": 24
+  },
+  {
+   "kind": "herd",
+   "title": "Unicorns in the glades",
+   "along": 0.7,
+   "model": "UNI",
+   "count": 3,
+   "height": 10,
+   "radius": 28
+  }
+ ],
+ "plan_cleared": true
+}

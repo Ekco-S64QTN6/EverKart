@@ -1,0 +1,33 @@
+# ---------------------------------------------------------------------------------------------
+# EverQuest's files are never in this repository: each player copies their own EverQuest folder
+# into Everquest/ (see Everquest/README.md). Only that folder's README is tracked.
+# ---------------------------------------------------------------------------------------------
+Everquest/*
+!Everquest/README.md
+
+# Everything built from them (python3 tools/build.py makes it again)
+work/
+game/public/
+game/electron/icon.png
+
+# Builds and dependencies
+game/node_modules/
+game/dist/
+game/release/
+node_modules/
+.venv/
+__pycache__/
+*.py[cod]
+*.AppImage
+EverKart-Setup-*.exe
+
+# Logs, local settings, editors, operating systems
+*.log
+.claude/settings.local.json
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,154 @@
+{
+ "name": "fearplane",
+ "zone": "fearplane",
+ "title": "Plane of Fear",
+ "sub": "Past the temple of Cazic-Thule",
+ "waypoints": [
+  [
+   -800,
+   800
+  ],
+  [
+   300,
+   1100
+  ],
+  [
+   1250,
+   900
+  ],
+  [
+   1250,
+   -50
+  ],
+  [
+   600,
+   -700
+  ],
+  [
+   -300,
+   -600
+  ],
+  [
+   -900,
+   -100
+  ]
+ ],
+ "half_width": 28,
+ "avoid": [],
+ "music_zone": "eerie",
+ "npcs3d": [
+  {
+   "model": "GOL",
+   "count": 3,
+   "height": 16,
+   "wander": true
+  },
+  {
+   "model": "TEN",
+   "count": 2,
+   "height": 10
+  },
+  {
+   "model": "SCA",
+   "count": 4,
+   "height": 4
+  },
+  {
+   "model": "SPE",
+   "count": 2,
+   "height": 7
+  },
+  {
+   "model": "GOR",
+   "count": 3,
+   "height": 9
+  },
+  {
+   "model": "DRU",
+   "count": 2,
+   "height": 20
+  }
+ ],
+ "course": {
+  "road": "cazblockf.bmp",
+  "kerb": "cazcheckf.bmp",
+  "road_bright": 1.3,
+  "barrier": "portst1.bmp"
+ },
+ "menu_name": "Plane of Fear",
+ "item_rows": [
+  0.22,
+  0.62
+ ],
+ "laps": 2,
+ "music3d": "eerie_8.ogg",
+ "skirmishes": [
+  {
+   "count": 10,
+   "heroes": [
+    "pc_HUM",
+    "pc_ELF",
+    "pc_DWM",
+    "pc_HIF",
+    "pc_BAM",
+    "pc_ERM",
+    "pc_DAF",
+    "pc_HOM",
+    "pc_OGM",
+    "pc_GNF"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "SCA"
+   ],
+   "foeHeight": 5
+  }
+ ],
+ "scenes": [
+  {
+   "model": "CAZ",
+   "height": 38,
+   "at": [
+    850,
+    210
+   ],
+   "yaw": 180,
+   "feature": true,
+   "featureScale": 1.3
+  }
+ ],
+ "vignettes": [
+  {
+   "kind": "feature",
+   "title": "The temple of Cazic-Thule"
+  },
+  {
+   "kind": "fight",
+   "title": "A raid on the golems",
+   "along": 0.3,
+   "heroes": [
+    "pc_HUM",
+    "pc_BAM",
+    "pc_OGM",
+    "pc_DWM",
+    "pc_ERM"
+   ],
+   "foes": [
+    "GOL"
+   ],
+   "pairs": 4,
+   "heroHeight": 6.5,
+   "foeHeight": 16,
+   "radius": 22
+  },
+  {
+   "kind": "herd",
+   "title": "Tentacle terrors",
+   "along": 0.65,
+   "model": "TEN",
+   "count": 3,
+   "height": 10,
+   "radius": 24
+  }
+ ]
+}

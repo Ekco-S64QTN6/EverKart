@@ -1,0 +1,138 @@
+{
+ "name": "nektulos",
+ "zone": "nektulos",
+ "title": "Nektulos Forest",
+ "sub": "Under the dark canopy",
+ "waypoints": [
+  [
+   -600.0,
+   -700.0
+  ],
+  [
+   -600.0,
+   400.0
+  ],
+  [
+   -100.0,
+   900.0
+  ],
+  [
+   300.0,
+   0.0
+  ],
+  [
+   900.0,
+   -300.0
+  ],
+  [
+   700.0,
+   -850.0
+  ]
+ ],
+ "half_width": 24,
+ "avoid": [
+  "w1.bmp"
+ ],
+ "music_zone": "nektulos",
+ "npcs3d": [
+  {
+   "model": "BEA",
+   "count": 3,
+   "height": 8,
+   "feature": true
+  },
+  {
+   "model": "WOL",
+   "count": 4,
+   "height": 5
+  },
+  {
+   "model": "ZOM",
+   "count": 3,
+   "height": 6
+  },
+  {
+   "model": "SPI",
+   "count": 2,
+   "height": 4
+  },
+  {
+   "model": "NGM",
+   "count": 6,
+   "height": 6
+  }
+ ],
+ "course": {
+  "road": "nstone.bmp",
+  "kerb": "nerrock.bmp",
+  "road_bright": 1.1,
+  "barrier": "nerrock.bmp"
+ },
+ "menu_name": "Nektulos Forest",
+ "item_rows": [
+  0.22,
+  0.62
+ ],
+ "laps": 2,
+ "music3d": "nektulos_0.ogg",
+ "skirmishes": [
+  {
+   "count": 10,
+   "heroes": [
+    "pc_HUM",
+    "pc_ELF",
+    "pc_DWM",
+    "pc_HIF",
+    "pc_BAM",
+    "pc_ERM",
+    "pc_DAF",
+    "pc_HOM",
+    "pc_OGM",
+    "pc_GNF"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "ZOM",
+    "BEA"
+   ],
+   "foeHeight": 7
+  }
+ ],
+ "vignettes": [
+  {
+   "kind": "kite",
+   "title": "Kiting zombies under the night canopy",
+   "along": 0.2,
+   "hero": "pc_DAF",
+   "foe": "ZOM",
+   "foeHeight": 6.5,
+   "radius": 22
+  },
+  {
+   "kind": "fight",
+   "title": "Young dark elves hunt spiders",
+   "along": 0.5,
+   "heroes": [
+    "pc_DAF",
+    "pc_HUM_lo",
+    "pc_GNF_lo"
+   ],
+   "foes": [
+    "SPI"
+   ],
+   "pairs": 3,
+   "heroHeight": 6,
+   "foeHeight": 4,
+   "radius": 16
+  },
+  {
+   "kind": "herd",
+   "title": "The guards of Neriak",
+   "along": 0.8,
+   "model": "NGM",
+   "count": 3,
+   "height": 6,
+   "radius": 14
+  }
+ ]
+}

@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-labelledby="t d">
+  <title id="t">EverKart</title>
+  <desc id="d">EverKart: kart racing through the zones of Norrath, built from your own EverQuest files.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#120a14"/>
+      <stop offset="0.55" stop-color="#2a1210"/>
+      <stop offset="1" stop-color="#5a1d0c"/>
+    </linearGradient>
+    <radialGradient id="ember" cx="0.5" cy="1.05" r="0.75">
+      <stop offset="0" stop-color="#ff8a2a" stop-opacity="0.75"/>
+      <stop offset="0.45" stop-color="#c2410c" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff3c4"/>
+      <stop offset="0.45" stop-color="#f6c453"/>
+      <stop offset="0.55" stop-color="#d99a22"/>
+      <stop offset="1" stop-color="#8a5a12"/>
+    </linearGradient>
+    <linearGradient id="streak" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffd27a" stop-opacity="0"/>
+      <stop offset="1" stop-color="#ffd27a" stop-opacity="0.55"/>
+    </linearGradient>
+    <pattern id="check" width="24" height="24" patternUnits="userSpaceOnUse">
+      <rect width="24" height="24" fill="#111"/>
+      <rect width="12" height="12" fill="#eee"/>
+      <rect x="12" y="12" width="12" height="12" fill="#eee"/>
+    </pattern>
+    <filter id="glow" x="-20%" y="-40%" width="140%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="360" fill="url(#sky)"/>
+  <rect width="1280" height="360" fill="url(#ember)"/>
+
+  <!-- distant peaks -->
+  <path d="M0 300 L120 220 L190 262 L300 170 L390 245 L470 205 L560 268 L680 190 L770 250 L860 200 L960 262 L1060 185 L1150 240 L1280 205 L1280 360 L0 360 Z" fill="#1a0b0b" opacity="0.85"/>
+  <path d="M0 330 L160 280 L260 305 L420 262 L560 300 L720 270 L880 305 L1040 272 L1180 300 L1280 285 L1280 360 L0 360 Z" fill="#0d0606"/>
+
+  <!-- embers -->
+  <g fill="#ffb347">
+    <circle cx="96" cy="88" r="2" opacity="0.7"/><circle cx="214" cy="140" r="1.5" opacity="0.5"/>
+    <circle cx="352" cy="64" r="1.8" opacity="0.6"/><circle cx="1012" cy="72" r="2" opacity="0.6"/>
+    <circle cx="1130" cy="128" r="1.5" opacity="0.5"/><circle cx="1214" cy="58" r="1.8" opacity="0.7"/>
+    <circle cx="866" cy="44" r="1.4" opacity="0.5"/><circle cx="452" cy="118" r="1.2" opacity="0.4"/>
+  </g>
+
+  <!-- the road sweeping in, with a chequered start line -->
+  <path d="M760 360 C840 330 980 318 1280 308 L1280 336 C1020 340 930 350 900 360 Z" fill="#2b1a10"/>
+  <path d="M760 360 C840 330 980 318 1280 308" stroke="#e8d7a8" stroke-width="3" fill="none" opacity="0.8"/>
+  <path d="M900 360 C930 350 1020 340 1280 336" stroke="#e8d7a8" stroke-width="3" fill="none" opacity="0.8"/>
+  <rect x="0" y="0" width="1280" height="14" fill="url(#check)" opacity="0.9"/>
+  <rect x="0" y="346" width="1280" height="14" fill="url(#check)" opacity="0.9"/>
+
+  <!-- speed streaks -->
+  <g transform="skewX(-12)">
+    <rect x="120" y="142" width="300" height="3" fill="url(#streak)"/>
+    <rect x="70" y="170" width="380" height="2" fill="url(#streak)"/>
+    <rect x="150" y="214" width="250" height="3" fill="url(#streak)"/>
+  </g>
+
+  <!-- title -->
+  <g transform="translate(640 196) skewX(-8)" text-anchor="middle" font-family="Cinzel, 'Trajan Pro', Georgia, 'Times New Roman', serif" font-weight="700">
+    <text y="6" font-size="132" letter-spacing="6" fill="#000" opacity="0.55">EverKart</text>
+    <text font-size="132" letter-spacing="6" fill="url(#gold)" stroke="#3a1d06" stroke-width="3" filter="url(#glow)">EverKart</text>
+  </g>
+  <text x="640" y="262" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" letter-spacing="7" fill="#f3e3bf">KART RACING THROUGH THE ZONES OF NORRATH</text>
+  <text x="640" y="296" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="17" fill="#c9a96b" opacity="0.9">built from your own EverQuest files</text>
+</svg>

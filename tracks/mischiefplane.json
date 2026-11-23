@@ -1,0 +1,148 @@
+{
+ "name": "mischiefplane",
+ "zone": "mischiefplane",
+ "title": "Plane of Mischief",
+ "sub": "Bristlebane\u2019s garden",
+ "waypoints": [
+  [
+   -1350,
+   -450
+  ],
+  [
+   -1050,
+   250
+  ],
+  [
+   -700,
+   700
+  ],
+  [
+   -690,
+   100
+  ],
+  [
+   -690,
+   -700
+  ],
+  [
+   -700,
+   -1250
+  ],
+  [
+   -1050,
+   -1000
+  ]
+ ],
+ "half_width": 26,
+ "avoid": [
+  "underwater1.bmp",
+  "wsurface1.bmp"
+ ],
+ "music_zone": "rivervale",
+ "npcs3d": [
+  {
+   "model": "RAT",
+   "count": 4,
+   "height": 3
+  },
+  {
+   "model": "BIX",
+   "count": 3,
+   "height": 3
+  },
+  {
+   "model": "UNI",
+   "count": 2,
+   "height": 10
+  },
+  {
+   "model": "MIM",
+   "count": 2,
+   "height": 3
+  }
+ ],
+ "course": {
+  "road": "greyflo.bmp",
+  "kerb": "purppl.bmp",
+  "road_bright": 1.2,
+  "barrier": "blumarbplain.bmp"
+ },
+ "menu_name": "Plane of Mischief",
+ "item_rows": [
+  0.22,
+  0.62
+ ],
+ "laps": 3,
+ "music3d": "rivervale_0.ogg",
+ "z_hint": 91,
+ "skirmishes": [
+  {
+   "count": 10,
+   "heroes": [
+    "pc_HUM",
+    "pc_ELF",
+    "pc_DWM",
+    "pc_HIF",
+    "pc_BAM",
+    "pc_ERM",
+    "pc_DAF",
+    "pc_HOM",
+    "pc_OGM",
+    "pc_GNF"
+   ],
+   "heroHeight": 6,
+   "foes": [
+    "RAT"
+   ],
+   "foeHeight": 3
+  }
+ ],
+ "scenes": [
+  {
+   "model": "BRI",
+   "height": 8,
+   "at": [
+    -850,
+    -450
+   ],
+   "yaw": 90,
+   "feature": true,
+   "featureScale": 1.6
+  }
+ ],
+ "vignettes": [
+  {
+   "kind": "feature",
+   "title": "Bristlebane"
+  },
+  {
+   "kind": "fight",
+   "title": "Heroes against the giant rats",
+   "along": 0.3,
+   "heroes": [
+    "pc_ELF_lo",
+    "pc_HUM_lo",
+    "pc_DWM_lo",
+    "pc_GNF_lo",
+    "pc_BAM_lo",
+    "pc_HIF_lo"
+   ],
+   "foes": [
+    "RAT"
+   ],
+   "pairs": 4,
+   "heroHeight": 6,
+   "foeHeight": 3.5,
+   "radius": 14
+  },
+  {
+   "kind": "herd",
+   "title": "Bixies on the wing",
+   "along": 0.6,
+   "model": "BIX",
+   "count": 4,
+   "height": 3,
+   "radius": 14
+  }
+ ]
+}

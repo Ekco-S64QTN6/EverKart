@@ -1,0 +1,15 @@
+# Line endings: LF everywhere, except the Windows scripts (CRLF, so cmd and PowerShell read
+# them right after a download as ZIP or a clone on Windows)
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.sh  text eol=lf
+
+# Binary files
+*.png  binary
+*.jpg  binary
+*.ico  binary
+*.glb  binary
+*.ogg  binary
+*.sf2  binary
