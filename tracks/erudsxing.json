@@ -5,6 +5,7 @@
  "sub": "Round the Kerran isle, on the sand",
  "menu_name": "Erud's Crossing",
  "half_width": 22,
+ "min_radius": 72,
  "laps": 3,
  "music_zone": "erudsxing",
  "music3d": "erudsxing_0.ogg",
@@ -23,7 +24,8 @@
   "kerb": "dock.bmp",
   "barrier": "bamboo.bmp",
   "road_bright": 1.3,
-  "open_width": 20
+  "open_width": 20,
+  "barriers": {"left": true, "right": false}
  },
  "item_rows": [0.18, 0.5, 0.8],
  "npcs3d": [

@@ -195,6 +195,14 @@ Built 2026-11-22 (`game/src/frontend/`), waiting for the user's look:
   and sink into it - keep every creature off the road; the off-track life is generic, boring and
   repetitive - make it varied and specific to each zone; arm and armor the fighters properly
   (armor sets, varied weapons and shields).
+- [ ] **A full handling and route review of every track** (user, 2026-11-24): balance
+  long straights against sweeping, flowing bends and a smaller number of deliberate hairpins
+  that reward the e-brake hop; smooth bumps and awkward kinks at their source. Check route
+  visibility, track width, scenery, barriers, road/kerb texture and intro on every course.
+  Plane of Hate is the priority overhaul: keep its speed, open the fog/view distance so the
+  architecture is visible, and redesign the lap around larger playable spaces including the
+  Church and broad halls, avoiding the tight city streets. Use each zone's local floorplan,
+  collision mesh and object footprints; no guessed waypoint changes.
 - [ ] **A full deep review of every current track** (user, 2026-11-22, next after the pillow
   room bridge): each one checked against the quality bar and fixed, not just a glance.
   - [x] Road width at the source, every track (see the feedback log, 2026-11-22).
@@ -259,10 +267,13 @@ Built 2026-11-22 (`game/src/frontend/`), waiting for the user's look:
   (`FAF`, gfaydark_chr.s3d) has no wing geometry and no wing texture at all: it is drawn as
   EverQuest has it. Ask the user which creature they meant by "faerie drakes" (a winged model
   from another zone, or wings added to the fairies).
-- [ ] **New track: Erud's Crossing — "Odus Crossing", the small island** (user, 2026-11-24): a sand
-  road round the edge of the island. The zone (`erudsxing`) is in the user's Project 1999
-  install (`~/Games/Project1999`), not yet in `Everquest/`: copy its files in, then the recipe
-  (docs/TRACK_GUIDE.md).
+- [ ] **Erud's Crossing — shoreline circuit and dusk pass** (user play-test, 2026-11-24):
+  the first build is playable, but the intended course is lower on the sandy shoreline, looping
+  smoothly around the Kerran island with the open ocean visible on the right. Remove the
+  seaward barrier while retaining the landward wall; replace the current kinked corners with
+  flowing racing arcs, keep a few deliberate e-brake turns, and lock the zone to a starry dusk.
+  The course is in the game; the revised shoreline waypoints still need to be laid against the
+  local floorplan and object footprints before the PR is ready to test.
 
 ### P4 — Racing feel
 - [x] **Play-test 2026-11-24** (user), fixed at the source, waiting for the next drive:

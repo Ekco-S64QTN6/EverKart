@@ -66,7 +66,7 @@ Route keys (all optional except the first three):
 | `bridges` | `[{from: [x, y], to: [x, y], z, ramp?, half_width?}]` — a **raised bridge** where the zone's way is too narrow for a kart track (VP: the pillow room's sunken aisle between the dragon beds' platforms): the road leaves the floor on its own deck — a ramp up (`ramp` units, default 140), level at `z` (the platforms' height), down again if the far end is lower — full width, walls on both edges, its sides down to the floor; nothing of the zone under it is reshaped |
 | `keep_objects` | extra objects that are architecture (door frames are already) |
 | `min_floor_z`, `z_hint`, `level_room`, `steep_walls`, `smooth_open` | planner details (see export_track.py) |
-| `course` | the track's look, from the zone's own textures: `road` (a floor texture: the road surface), `kerb` (a trim: the banded kerbs), `barrier` (a wall texture: the low walls along the edges); `road_bright` (light on the road); `barriers: false` (none — rare); the textures' scale is taken from the zone itself (`road_tile` etc. to override) |
+| `course` | the track's look, from the zone's own textures: `road` (a floor texture: the road surface), `kerb` (a trim: the banded kerbs), `barrier` (a wall texture: the low walls along the edges); `road_bright` (light on the road); `barriers: false` (no walls) or `barriers: {left: false, right: false}` (open only the named side; sides are relative to the direction of travel and omitted sides keep their walls); the textures' scale is taken from the zone itself (`road_tile` etc. to override) |
 
 Waypoint rules learned the hard way:
 - **Through the middle of every door frame / arch** (objects `*FRAME*`, `*ARCH*`): one waypoint
@@ -178,9 +178,7 @@ A kart track is a modelled road, not the zone's bare ground:
   another way through, or a bridge (`bridges`).
 - **Kerbs:** banded strips in the `kerb` texture on both edges, except where they would lie on
   another stretch's road (a fork, a junction, a crossing).
-- **Barriers:** a low wall (2.6 high) in the `barrier` texture along both edges, the whole way;
-  broken only where the zone's own wall is the edge, where another stretch of the track runs
-  alongside or crosses (shared lanes, junctions), and on the inside of turns too tight for it.
+- **Barriers:** by default, a low wall (2.6 high) in the `barrier` texture along both edges, the whole way; a course can open only its seaward or exposed side with `course.barriers: {"right": false}` or `{"left": false}` (relative to travel direction). The road width must still stop at the real edge, and an open side must not get an invisible collision rail. Walls are otherwise broken only where the zone's own wall is the edge, where another stretch of the track runs alongside or crosses (shared lanes, junctions), and on the inside of turns too tight for it.
   Short gaps are closed, short stubs dropped: walls run in long clean lengths, with end caps.
   Karts bounce off them (`keepInside`).
 - **The zone under it** (`game/src/roadbed.js`): the zone's ground under the road and kerbs is

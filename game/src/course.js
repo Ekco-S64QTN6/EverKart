@@ -695,8 +695,14 @@ export function buildCourse(scene, track, collider, cast, visual = null) {
   const railR = new Float32Array(n).fill(Infinity);
   const railL = new Float32Array(n).fill(Infinity);
   const wallAt = (i, sgn) => sideW(sgn)[i] + KERB;
+  // Barriers default to both sides. A course may open one edge (for example, the sea side of
+  // an island road) without removing its landward wall. A side setting is relative to the
+  // direction of travel; an omitted side remains walled. An open side has no keep-inside rail.
+  const barrierSideEnabled = (sgn) => !c.barriers || typeof c.barriers !== 'object'
+    || c.barriers[sgn > 0 ? 'right' : 'left'] !== false;
   if (c.barriers !== false) {
     for (const [rail, sgn] of [[railR, 1], [railL, -1]]) {
+      if (!barrierSideEnabled(sgn)) continue;
       for (let i = 0; i < n; i++) {
         if (hidden.has(i)) continue;                         // (drawn by the first pass of a shared road)
         const e = wallAt(i, sgn);

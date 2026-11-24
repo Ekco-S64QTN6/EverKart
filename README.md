@@ -34,7 +34,7 @@
 
 ## ✨ Features
 
-- **Sixteen tracks through classic Norrath.** Veeshan's Peak, Temple of Veeshan, Kael Drakkal,
+- **Seventeen tracks through classic Norrath.** Veeshan's Peak, Temple of Veeshan, Kael Drakkal,
   Greater Faydark, Butcherblock, North Karana, the Commonlands, the Planes of Fear, Hate,
   Growth and Mischief, and more. Each is a real
   kart track laid through the real zone: a smooth road in the zone's own stone, with kerbs and
@@ -149,6 +149,7 @@ The sparks go white, then blue (small turbo), then orange (big turbo); let go to
 | Butcherblock Mountains | From the docks to the gates of Kaladim | 2 laps |
 | North Karana | Across the plains to the druid circle | 2 laps |
 | East Commonlands | The road from the gates of Freeport | 2 laps |
+| Erud's Crossing | Around the Kerran island on the sand | 3 laps |
 
 Veeshan's Peak is the reference track: the others are being brought up to its standard (see
 the [roadmap](ROADMAP.md)).
