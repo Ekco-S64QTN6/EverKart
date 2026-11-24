@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 
 const NAMES = ['kart', 'tick', 'go', 'ding', 'pickup', 'cast', 'travel', 'fire', 'hit', 'snare', 'thunder',
-  'gate', 'wolf', 'invis', 'whirl', 'whoosh', 'bump'];
+  'gate', 'wolf', 'invis', 'whirl', 'whoosh', 'bump', 'ice'];
 const REACH = 160;              // beyond this a sound in the world is silent
 
 export class Sfx {

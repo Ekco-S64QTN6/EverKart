@@ -14,11 +14,12 @@ player's machine from their own files.
 | Trees, braziers, banners, furniture | the zone's placed objects (`objects.wld` + `<zone>_obj.s3d`), including those built as a rig with a mesh per bone (the swaying trees of Mischief and Growth); only clutter standing on the road is removed |
 | Dragons, drakes, wurms, giants, wolves, orcs, guards | the zone's `<zone>_chr.s3d`, skinned, playing their own EverQuest animations; models without an animation borrow it from a matching skeleton, as EverQuest does |
 | Racers | all 13 classic player races, male and female (`global_chr.s3d`, iksar from `global4_chr.s3d`), in every armor set the race has, and EverQuest NPC models. Each is seated as a kart driver from its own standing pose: sitting up, head level, legs stretched ahead in the kart's tub, both hands on the steering wheel |
-| Weapons and shields | EverQuest's held items (`gequip.s3d`) on the characters' hand and shield bones; each character fights in its style (sword and board, two-handers, dual wield, casters, monks) |
+| Weapons, shields and armor | EverQuest's held items (`gequip.s3d`: ~90 swords, daggers, maces, axes, two-handers, polearms, staves and shields, sorted by their textures) on the characters' hand and shield bones; every fighter armed at random for a fighting style its race favours (sword and board, two-handers, dual wield, casters, monks), and dressed in one of its race's armor sets (leather, chain, plate) |
 | Life beside the track | named NPCs at their real spawn points (Brewall's maps), raids, a monk training racnar, landmark scenes per zone, and dragons breathing fire at passing karts (`scenes`, `vignettes`, `npcs3d` in `tracks/*.json`) |
 | Karts | an original design, built from EverQuest textures (plank wood, iron) and flying real EverQuest banners |
 | Spells (items) | EverQuest's spell icons and each spell's own particle effect: `spells_us.txt` gives the effect, `spellsnew.eff` its emitters, `spellsnew.edd` each emitter, with the sprites in `SpellEffects/` |
-| Sky (outdoor zones) | the zone's own sky set from `sky.s3d`, with EverQuest's sun and moon through a day and a night; each zone's fog colour and distances are its real header values (`tracks/zone_headers.json`) |
+| Sky (outdoor zones) | the sky its zone header names, from `sky.s3d`: the textures `sky.wld` gives that sky number, projected flat across a shallow dome at EverQuest's own tiling, with its sun and moon through a day and a night; sky 0 is no dome (the zone's fog colour is its sky: Faydark, Everfrost, Nektulos); each zone's fog colour and distances are its real header values (`tracks/zone_headers.json`) |
+| Weather | rain where it rains in Norrath and snow in the north, rolled at random each race (the Weather option): falling streaks with EverQuest's own splash rings (`rainring.bmp`) and its snowflake (`snowflake.bmp`, both in `gequip.s3d`), a grey sky, the fog closing in, lightning and EverQuest's thunder in a storm |
 | Music | the zone's `.xmi`, converted to MIDI and rendered with a General MIDI soundfont; zones without music of their own borrow the nearest EverQuest theme |
 | Sound effects | EverQuest's own sounds (`snd*.pfs`): the mine-cart rumble for your kart, casting, spell hits, thunder, teleport, a wolf's howl, the level-up ding at the finish |
 | Animated textures | fire, lava, smoke and water cycle their EverQuest frames at EverQuest's own rate |
@@ -61,6 +62,7 @@ followed by the countdown.
 | `race.js` | the track's line, progress and laps, CPU drivers and rubber banding |
 | `npcs.js` | the zone's inhabitants: named NPCs, raids, trains, fights, herds |
 | `items.js`, `eqfx.js` | spells as items, and EverQuest's particle effects |
+| `weather.js` | rain and snow by zone |
 | `frontend/` | every screen outside the race: title, main menu, racer carousel, track cover flow, campaign (cups, standings, podium), options, loading (`frontend.js`), the 3D showroom of karts behind them (`showroom.js`), one stylesheet (`frontend.css`) |
 | `settings.js` | the player's options, kept between sessions; the race reads them |
 | `ui.js` | the racer and track lists, the race's results screen |

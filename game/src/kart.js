@@ -12,6 +12,7 @@ export const TUNING = {
   driftTurnOut: 1.15, driftTurnIn: 2.8, hop: 16, turboScale: 1.28,
   turbo1: [0.9, 0.7], turbo2: [2.0, 1.3],          // [charge needed, boost seconds]
   gravity: 150, stepUp: 7, snapDown: 9, radius: 3.2, height: 7.5,  // walls checked above step height
+  speedClass: 1,                                    // the race's engine class (settings.js SPEED_CLASSES)
 };
 
 // Convention: yaw 0 faces -z; increasing yaw turns RIGHT (towards +x when facing -z).
@@ -98,9 +99,9 @@ export class Kart {
     const lat = this.vel.clone().addScaledVector(f, -along);
     // off the track the ground slows you (a boost carries you over it)
     const rough = this.offRoad && !(this.turbo > 0 || this.boost > 0) ? 0.6 : 1;
-    const max = T.maxSpeed * this.maxSpeedScale * (this.effectScale ?? 1) * (this.turbo > 0 ? T.turboScale : 1) * rough;
+    const max = T.maxSpeed * T.speedClass * this.maxSpeedScale * (this.effectScale ?? 1) * (this.turbo > 0 ? T.turboScale : 1) * rough;
     if (this.turbo > 0) { this.turbo -= dt; along = Math.max(along, max * 0.97); }
-    if (throttle > 0) along += T.accel * (this.accelScale ?? 1) * throttle * dt * Math.max(0, 1 - Math.max(0, along) / max) ** 0.6;
+    if (throttle > 0) along += T.accel * T.speedClass * (this.accelScale ?? 1) * throttle * dt * Math.max(0, 1 - Math.max(0, along) / max) ** 0.6;
     else if (throttle < 0) along -= (along > 0 ? T.brake : T.accel * 0.6) * -throttle * dt;
     else along -= Math.sign(along) * Math.min(Math.abs(along), T.coast * dt);
     if (along > max) along -= (along - max) * Math.min(1, 2 * dt);

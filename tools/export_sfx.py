@@ -34,6 +34,7 @@ SOUNDS = {
     "whirl": "wind_magical.wav",         # a whirlwind waiting on the road (loop)
     "whoosh": "ghost_wind_whoosh.wav",   # ... and catching someone
     "bump": "punchhit.wav",              # a kart hits a wall
+    "ice": "ice_crack01.wav",            # an Ice Comet lands
 }
 
 

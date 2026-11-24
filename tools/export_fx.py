@@ -56,6 +56,16 @@ def main():
         g = grid_of(rgba)
         im.save(out / f"{name}.png")
         meta[name] = {"grid": g}
+    # the weather: EverQuest's own snowflake and rain-splash ring (gequip.s3d), drawn additively
+    import io
+    from s3d import read_archive
+    gequip = read_archive(need("gequip.s3d"))
+    for name in ("snowflake", "rainring"):
+        im = Image.open(io.BytesIO(gequip[f"{name}.bmp"])).convert("RGB")
+        rgba = np.asarray(im.convert("RGBA")).copy()
+        rgba[..., 3] = rgba[..., :3].max(axis=2)
+        Image.fromarray(rgba, "RGBA").save(out / f"weather_{name}.png")
+        meta[f"weather_{name}"] = {"grid": 1}
     (out / "fx.json").write_text(json.dumps(meta, indent=1))
     print(f"{len(meta)} sprites:", ", ".join(f"{k}({v['grid']})" for k, v in meta.items()))
 

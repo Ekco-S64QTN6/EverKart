@@ -1,5 +1,5 @@
-// The front end, screen by screen, driven with real key presses: title, main menu, racer select
-// (and a held arrow running through the list), track select, campaign cups, options.
+// The front end, screen by screen, driven with real key presses: title, main menu, engine class,
+// racer select (and a held arrow running through the list), track select, campaign cups, options.
 //   node tools/menu_shot.mjs <outdir> [--race]     (needs the dev server; --race: start the race too)
 //   node tools/menu_shot.mjs <outdir> --campaign   (a finished cup: the standings, then the podium)
 import puppeteer from 'puppeteer-core';
@@ -34,11 +34,16 @@ if (flag === '--campaign') {                           // a cup with every race 
 await page.evaluateOnNewDocument(() => localStorage.clear());
 await page.goto('http://localhost:5199/', { waitUntil: 'load' });
 const shot = async (name, wait = 1500) => { await sleep(wait); await page.screenshot({ path: `${out}/${name}.png` }); console.log(name); };
-const press = async (key, n = 1) => { for (let i = 0; i < n; i++) { await page.keyboard.press(key); await sleep(260); } };
+const press = async (key, n = 1) => { for (let i = 0; i < n; i++) { await page.keyboard.press(key); await sleep(600); } };   // (a screen change takes a moment under software rendering)
 await shot('1_title', 6000);
 await press('Enter');
 await shot('2_main');
 await press('Enter');                                  // Single Race
+await shot('3_class');
+await press('ArrowRight');                             // 150cc
+await shot('3_class_150', 800);
+await press('ArrowLeft');                              // back to 100cc
+await press('Enter');
 await shot('3_racer', 4000);
 await press('ArrowRight', 3);
 await shot('4_racer_right3', 3000);
@@ -56,13 +61,14 @@ if (flag === '--race') {
   await page.waitForFunction(() => window.__ek?.state, { timeout: 600000, polling: 500 });
   await shot('10_race', 2000);
 } else {
-  await press('Escape', 2);                            // back to the main menu
+  await press('Escape', 3);                            // back to the main menu (track, racer, class)
   await press('ArrowDown');
   await press('Enter');                                // Campaign
+  await press('Enter');                                // its class
   await shot('9_cups');
   await press('ArrowDown');
   await shot('10_cups_rivals', 800);
-  await press('Escape');
+  await press('Escape', 2);                            // cups, class
   await press('ArrowDown');
   await press('Enter');                                // Options
   await shot('11_options');

@@ -1,7 +1,7 @@
 // EverKart's front end: every screen outside the race, in one style, over the 3D showroom.
 //
-//   title -> main menu -> Single Race:  racer -> track -> race
-//                      -> Campaign:     cup -> racer -> race, standings, race ... -> podium
+//   title -> main menu -> Single Race:  class -> racer -> track -> race
+//                      -> Campaign:     class -> cup -> racer -> race, standings, race ... -> podium
 //                      -> Options:      video, audio, gameplay, controls
 //                      -> Quit (the desktop app)
 //
@@ -14,7 +14,7 @@ import '@fontsource/alegreya-sans/700.css';
 import './frontend.css';
 import { Showroom } from './showroom.js';
 import { RACERS, TRACKS, opponents } from '../ui.js';
-import { settings, setSetting, DIFFICULTY, applyFullscreen } from '../settings.js';
+import { settings, setSetting, DIFFICULTY, SPEED_CLASSES, speedClass, applyFullscreen } from '../settings.js';
 
 // --- the campaign: four cups, points per race, a trophy per cup ------------------------------------
 export const CUPS = [
@@ -29,6 +29,8 @@ const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; 
 const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* not kept */ } };
 export const loadCampaign = () => read(CKEY, null);
 const trophies = () => read(TKEY, {});
+// a cup's trophy is won in each class (100cc keeps the plain cup key trophies were first kept under)
+const trophyKey = (cupId, cls) => ((cls ?? 1) === 1 ? cupId : `${cupId}.${speedClass(cls).name}`);
 
 // the race the campaign is on: { track, racer, field, difficulty, cup, race, of }
 export function campaignRace() {
@@ -36,7 +38,7 @@ export function campaignRace() {
   if (!c) return null;
   const cup = CUPS.find((x) => x.id === c.cup);
   if (!cup || c.race >= cup.tracks.length) return null;
-  return { track: cup.tracks[c.race], racer: c.racer, field: c.field, difficulty: c.difficulty, cup, race: c.race, of: cup.tracks.length };
+  return { track: cup.tracks[c.race], racer: c.racer, field: c.field, difficulty: c.difficulty, speedClass: c.speedClass ?? 1, cup, race: c.race, of: cup.tracks.length };
 }
 
 // after a campaign race: order = the racers' names, first to last
@@ -86,6 +88,9 @@ class Nav {
     addEventListener('keydown', this.onKey);
     addEventListener('keyup', this.onUp);
     addEventListener('blur', this.onBlur);
+    // a button already down as a screen opens (A held from driving over the line) is not a press
+    const p = this.pad();
+    if (p) for (const [name, i] of [['a', 0], ['start', 9], ['b', 1], ['lb', 4], ['rb', 5], ['y', 3], ['x', 2]]) this.prevPad[name] = !!p.buttons[i]?.pressed;
   }
 
   dispose() {
@@ -239,8 +244,8 @@ export function startFrontend({ renderer, onRace, screen = 'title' }) {
   const mainChoose = () => {
     const id = mainItems[mainSel].id;
     sound('pickup', 0.45);
-    if (id === 'race') { flow = { kind: 'single' }; go('racer'); }
-    else if (id === 'campaign') go('cups');
+    if (id === 'race') { flow = { kind: 'single' }; go('class'); }
+    else if (id === 'campaign') { flow = { kind: 'campaign' }; go('class'); }
     else if (id === 'options') go('options');
     else if (id === 'quit') window.everkart.quit();
   };
@@ -256,6 +261,40 @@ export function startFrontend({ renderer, onRace, screen = 'title' }) {
   mainEl.querySelectorAll('.fe-item').forEach((e) => {
     e.addEventListener('mouseenter', () => { mainSel = +e.dataset.i; mainMark(); });
     e.addEventListener('click', () => { mainSel = +e.dataset.i; mainChoose(); });
+  });
+
+  // --- the engine class, chosen first as kart racers do it: 50cc, 100cc, 150cc ------------------------
+  let classSel = speedClass(S.speedClass) === SPEED_CLASSES[S.speedClass] ? S.speedClass : 1;
+  const classEl = h(`<div>
+      <div class="fe-head"><h1>Choose your class</h1><span class="fe-sub"></span></div>
+      <div class="fe-cups fe-classes"></div>
+    </div>`);
+  const classDraw = () => {
+    classEl.querySelector('.fe-sub').textContent = flow?.kind === 'campaign' ? 'Every race of the cup at this pace; a trophy for each class' : 'Every kart in the race runs at this pace';
+    classEl.querySelector('.fe-cups').innerHTML = SPEED_CLASSES.map((c, i) => `<div class="fe-cup fe-panel ${i === classSel ? 'sel' : ''}" data-i="${i}">
+        <div class="fe-cc">${c.name}</div><div class="sub">${c.sub}</div>
+        <div class="fe-speed">${SPEED_CLASSES.map((_, j) => `<i class="${j <= i ? 'on' : ''}"></i>`).join('')}</div></div>`).join('');
+    classEl.querySelectorAll('.fe-cup').forEach((e) => e.addEventListener('click', () => {
+      const i = +e.dataset.i;
+      if (i === classSel) classChoose(); else { classSel = i; sound('tick', 0.25); classDraw(); }
+    }));
+  };
+  const classChoose = () => {
+    sound('pickup', 0.5);
+    setSetting('speedClass', classSel);
+    go(flow?.kind === 'campaign' ? 'cups' : 'racer');
+  };
+  add('class', classEl, {
+    enter() { room.setMode('empty'); classDraw(); },
+    action(a) {
+      if (a === 'left' || a === 'right' || a === 'up' || a === 'down') {
+        const d = a === 'left' || a === 'up' ? -1 : 1;
+        const j = Math.max(0, Math.min(SPEED_CLASSES.length - 1, classSel + d));
+        if (j !== classSel) { classSel = j; sound('tick', 0.25); classDraw(); }
+      } else if (a === 'ok') classChoose();
+      else if (a === 'back') { sound('whoosh', 0.3); go('main'); }
+    },
+    hints: () => [['◀ ▶', 'Class'], OK, BACK],
   });
 
   // --- racer select: a turning row of the real racers in their karts ---------------------------------
@@ -278,7 +317,7 @@ export function startFrontend({ renderer, onRace, screen = 'title' }) {
       arm.innerHTML = `<span>▴</span><span>${esc(armorName(r, it.armor))}</span><span class="pips">${r.armors.map((a) => `<i class="pip ${a.id === it.armor ? 'on' : ''}"></i>`).join('')}</span><span>▾</span>`;
     } else arm.innerHTML = `<span style="opacity:.6">${esc(armorName(r, it.armor))}</span>`;
     racerEl.querySelector('.fe-count').textContent = `${racerSel + 1} / ${racerItems.length}`;
-    racerEl.querySelector('.fe-sub').textContent = flow?.kind === 'campaign' ? flow.cup.name : '';
+    racerEl.querySelector('.fe-sub').textContent = `${flow?.kind === 'campaign' ? `${flow.cup.name} · ` : ''}${speedClass(S.speedClass).name}`;
     // a ribbon of where you are in the list (eleven marks around the selection)
     const n = racerItems.length, marks = [];
     for (let k = -5; k <= 5; k++) marks.push(`<i class="${k === 0 ? 'on' : ''}" style="opacity:${1 - Math.abs(k) * 0.15}"></i>`);
@@ -321,7 +360,7 @@ export function startFrontend({ renderer, onRace, screen = 'title' }) {
       else if (a === 'down' || a === 'lb') armorStep(-1);
       else if (a === 'extra') racerMove(1 + Math.floor(Math.random() * (racerItems.length - 1)));
       else if (a === 'ok') racerChoose();
-      else if (a === 'back') { sound('whoosh', 0.3); go(flow?.kind === 'campaign' ? 'cups' : 'main'); }
+      else if (a === 'back') { sound('whoosh', 0.3); go(flow?.kind === 'campaign' ? 'cups' : 'class'); }
     },
     hints: () => [['◀ ▶', 'Racer (hold to run)'], ['▲ ▼', 'Armor'], ['R / Y', 'Random'], OK, BACK],
   });
@@ -387,19 +426,20 @@ export function startFrontend({ renderer, onRace, screen = 'title' }) {
   // --- campaign: the cups --------------------------------------------------------------------------------
   let cupSel = 0, cupRow = 0, cupDiff = S.difficulty;
   const cupEl = h(`<div>
-      <div class="fe-head"><h1>Campaign</h1><span class="fe-sub">Race every track of a cup: points for each finish, a trophy for the cup</span></div>
+      <div class="fe-head"><h1>Campaign</h1><span class="fe-sub"></span></div>
       <div class="fe-cups"></div>
       <div class="fe-row fe-panel"><span>Rivals</span><span class="ar">◀</span><b></b><span class="ar">▶</span></div>
     </div>`);
   const cupDraw = () => {
     const won = trophies();
+    cupEl.querySelector('.fe-sub').textContent = `${speedClass(S.speedClass).name} · race every track of a cup: points for each finish, a trophy for the cup`;
     cupEl.querySelector('.fe-cups').innerHTML = CUPS.map((c, i) => {
-      const best = won[c.id];
+      const best = won[trophyKey(c.id, S.speedClass)];
       const m = MEDAL[best];
       return `<div class="fe-cup fe-panel ${i === cupSel ? 'sel' : ''}" data-i="${i}">${trophySvg(m ? m[0] : '#f6c453', !m)}
         <h3>${c.name}</h3><div class="sub">${c.sub}</div>
         <ol>${c.tracks.map((id) => `<li>${esc(TRACKS.find((t) => t.id === id)?.name || id)}</li>`).join('')}</ol>
-        <div class="won" style="color:${m ? m[0] : 'var(--ek-dim)'}">${m ? `${m[1]} trophy` : 'No trophy yet'}</div></div>`;
+        <div class="won" style="color:${m ? m[0] : 'var(--ek-dim)'}">${m ? `${m[1]} trophy` : `No ${speedClass(S.speedClass).name} trophy yet`}</div></div>`;
     }).join('');
     cupEl.querySelectorAll('.fe-cup').forEach((e) => e.addEventListener('click', () => {
       const i = +e.dataset.i;
@@ -421,14 +461,14 @@ export function startFrontend({ renderer, onRace, screen = 'title' }) {
         sound('tick', 0.25);
         cupDraw();
       } else if (a === 'ok') cupChoose();
-      else if (a === 'back') { sound('whoosh', 0.3); go('main'); }
+      else if (a === 'back') { sound('whoosh', 0.3); go('class'); }
     },
     hints: () => [['◀ ▶', 'Cup'], ['▼', 'Rivals'], OK, BACK],
   });
 
   function startCampaign(cup, racer) {
     const field = opponents(racer, 7).map((o) => ({ code: o.code, armor: o.armor, name: o.name }));
-    write(CKEY, { cup: cup.id, racer, field, difficulty: cupDiff, race: 0, points: {}, last: [] });
+    write(CKEY, { cup: cup.id, racer, field, difficulty: cupDiff, speedClass: S.speedClass, race: 0, points: {}, last: [] });
     const r = campaignRace();
     race(r.track, racer, { campaign: true });
   }
@@ -451,7 +491,7 @@ export function startFrontend({ renderer, onRace, screen = 'title' }) {
       if (!c) { go('main'); return; }
       const cup = CUPS.find((x) => x.id === c.cup);
       const rows = standRows(c);
-      standEl.querySelector('.fe-sub').textContent = `${cup.name} · after race ${c.race} of ${cup.tracks.length}`;
+      standEl.querySelector('.fe-sub').textContent = `${cup.name} · ${speedClass(c.speedClass).name} · after race ${c.race} of ${cup.tracks.length}`;
       standEl.querySelector('table').innerHTML = rows.map((r, i) => `<tr class="${r.name === 'You' ? 'you' : ''}"><td class="p">${i + 1}</td>
         <td class="n">${esc(r.name)}</td><td class="r">${esc(racerLine(r.info))}</td><td class="g">${r.gained ? '+' + r.gained : ''}</td><td class="t">${r.total}</td></tr>`).join('');
       const lead = rows[0].info;
@@ -478,10 +518,11 @@ export function startFrontend({ renderer, onRace, screen = 'title' }) {
       const rows = standRows(c);
       const place = rows.findIndex((r) => r.name === 'You') + 1;
       const m = MEDAL[place];
-      podEl.querySelector('h1').textContent = m ? `${cup.name} · ${m[1]}` : cup.name;
+      const ccName = speedClass(c.speedClass).name, tk = trophyKey(cup.id, c.speedClass);
+      podEl.querySelector('h1').textContent = m ? `${cup.name} ${ccName} · ${m[1]}` : `${cup.name} ${ccName}`;
       podEl.querySelector('p').textContent = m ? `You finish ${place === 1 ? 'first' : place === 2 ? 'second' : 'third'} with ${rows[place - 1].total} points.`
         : `You finish ${place}th with ${rows[place - 1].total} points. The podium awaits next time.`;
-      if (m) { const t = trophies(); if (!t[cup.id] || place < t[cup.id]) { t[cup.id] = place; write(TKEY, t); } sound('ding', 0.6); }
+      if (m) { const t = trophies(); if (!t[tk] || place < t[tk]) { t[tk] = place; write(TKEY, t); } sound('ding', 0.6); }
       room.setMode('podium', { items: rows.slice(0, 3).map((r) => ({ code: r.info.code, armor: r.info.armor, info: RACERS.find((q) => q.code === r.info.code) })) });
       localStorage.removeItem(CKEY);
     },
@@ -505,8 +546,12 @@ export function startFrontend({ renderer, onRace, screen = 'title' }) {
       { k: 'difficulty', name: 'Rivals', vals: [0, 1, 2], show: (v) => DIFFICULTY[v].name, note: 'How fast the other racers drive, and how hard they keep up' },
       { k: 'laps', name: 'Laps', vals: [0, 1, 2, 3, 4, 5], show: (v) => (v ? `${v}` : 'The track’s own') },
       { k: 'minimap', name: 'Minimap', vals: [true, false], show: (v) => (v ? 'Shown' : 'Hidden') },
+      { k: 'weather', name: 'Weather', vals: ['random', 'always', 'clear'], show: (v) => ({ random: 'Changing', always: 'Always', clear: 'Clear skies' })[v], note: 'Rain and snow where they fall in Norrath' },
     ],
-    Controls: null,
+    Controls: [
+      { k: 'padLayout', name: 'Controller', vals: ['classic', 'triggers'], show: (v) => (v === 'triggers' ? 'Triggers: RT drives, LT brakes' : 'Classic: A drives, B brakes'),
+        note: 'Classic is the kart racer\u2019s layout; Triggers drives like a racing game', apply: () => keysDraw() },
+    ],
   };
   const TABS = Object.keys(OPTS);
   let tab = 0, optSel = 0;
@@ -514,23 +559,29 @@ export function startFrontend({ renderer, onRace, screen = 'title' }) {
       <div class="fe-head"><h1>Options</h1></div>
       <div class="fe-tabs">${TABS.map((t, i) => `<div class="fe-tab" data-i="${i}">${t}</div>`).join('')}</div>
       <div class="fe-opts fe-panel"></div>
-      <div class="fe-keys fe-panel"><table>
+      <div class="fe-keys fe-panel"><table></table></div>
+    </div>`);
+  // the bindings, for the controller layout chosen
+  const keysDraw = () => {
+    const tr = S.padLayout === 'triggers';
+    optEl.querySelector('.fe-keys table').innerHTML = `
         <tr><th></th><th>Keyboard</th><th>Controller</th></tr>
         <tr><td>Steer</td><td>← → / A D</td><td>Left stick, D-pad</td></tr>
-        <tr><td>Accelerate</td><td>↑ / W</td><td>A</td></tr>
-        <tr><td>Brake / reverse</td><td>↓ / S</td><td>B / X</td></tr>
-        <tr><td>Drift (release for a mini-turbo)</td><td>Space</td><td>RB / RT</td></tr>
-        <tr><td>Cast your spell</td><td>E / Shift</td><td>LB / LT / Y</td></tr>
-        <tr><td>Back on the track</td><td>R</td><td>Back</td></tr>
-        <tr><td>Pause</td><td>Esc / P</td><td>Start</td></tr>
-        <tr><td>Fullscreen / window</td><td>F11</td><td></td></tr>
-      </table></div>
-    </div>`);
+        <tr><td>Accelerate</td><td>↑ / W</td><td>${tr ? 'RT / A' : 'A'}</td></tr>
+        <tr><td>Brake / reverse</td><td>↓ / S</td><td>${tr ? 'LT / B' : 'B'}</td></tr>
+        <tr><td>Drift (release for a mini-turbo)</td><td>Space</td><td>${tr ? 'RB' : 'RB / RT'}</td></tr>
+        <tr><td>Cast your spell</td><td>E / Shift</td><td>${tr ? 'LB / Y' : 'LB / LT / Y'}</td></tr>
+        <tr><td>Look behind (hold)</td><td>Q / C</td><td>X</td></tr>
+        <tr><td>Back on the track</td><td>R</td><td>Back / View</td></tr>
+        <tr><td>Pause</td><td>Esc / P</td><td>Start / Menu</td></tr>
+        <tr><td>Fullscreen / window</td><td>F11</td><td></td></tr>`;
+  };
   const optDraw = () => {
     optEl.querySelectorAll('.fe-tab').forEach((e, i) => e.classList.toggle('sel', i === tab));
     const list = OPTS[TABS[tab]];
     optEl.querySelector('.fe-opts').style.display = list ? '' : 'none';
-    optEl.querySelector('.fe-keys').style.display = list ? 'none' : '';
+    optEl.querySelector('.fe-keys').style.display = TABS[tab] === 'Controls' ? '' : 'none';
+    keysDraw();
     if (!list) return;
     optEl.querySelector('.fe-opts').innerHTML = list.map((o, i) => `<div class="fe-opt ${i === optSel ? 'sel' : ''}" data-i="${i}"><span>${o.name}</span>
       <span class="v"><span class="ar">◀</span>${o.show(S[o.k])}<span class="ar">▶</span></span>${o.note ? `<div class="note">${o.note}</div>` : ''}</div>`).join('');

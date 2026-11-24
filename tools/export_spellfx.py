@@ -31,6 +31,7 @@ ITEM_SPELLS = {
     "gate": "Gate",
     "invis": "Invisibility",
     "lightning": "Shock of Lightning",
+    "icecomet": "Ice Comet",
 }
 EFFECT_FIELD = 145
 EFF_SIZE, EDD_SIZE = 268, 416

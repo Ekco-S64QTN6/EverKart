@@ -11,7 +11,20 @@ export const DEFAULTS = {
   difficulty: 1,           // CPU racers: 0 apprentice, 1 journeyman, 2 master
   minimap: true,
   intro: true,             // the race intro (course flyover, grid)
+  weather: 'random',       // rain and snow where they fall: 'random' (changing), 'always', 'clear'
+  padLayout: 'classic',    // the controller: 'classic' (A drives, B brakes) or 'triggers' (RT drives, LT brakes)
+  speedClass: 1,           // the engine class last raced: 0 50cc, 1 100cc, 2 150cc (SPEED_CLASSES)
 };
+
+// The engine classes, as kart racers have them: every kart in the race (yours and the rivals') runs
+// at the class's pace - top speed and acceleration both, so a kart takes as long to reach its top
+// speed in each. 100cc is the game's own tuning.
+export const SPEED_CLASSES = [
+  { name: '50cc', speed: 0.95, sub: 'An easier pace: time to take in the sights' },
+  { name: '100cc', speed: 1, sub: 'The standard race' },
+  { name: '150cc', speed: 1.12, sub: 'Fast and unforgiving: drift early, brake late' },
+];
+export const speedClass = (i) => SPEED_CLASSES[i] || SPEED_CLASSES[1];
 
 export const DIFFICULTY = [
   { name: 'Apprentice', skill: 0.86, band: 0.7 },   // slower rivals, gentler catch-up

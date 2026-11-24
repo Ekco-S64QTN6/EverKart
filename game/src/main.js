@@ -1,18 +1,19 @@
 import * as THREE from 'three';
 import { loadZone, cast, makeSky, addToCollider, DAY_MINUTES } from './world.js';
+import { rollWeather, Weather } from './weather.js';
 import { carveZone } from './roadbed.js';
 import { Sfx } from './sfx.js';
-import { Kart, seatDriver, animateKart } from './kart.js';
+import { Kart, seatDriver, animateKart, TUNING } from './kart.js';
 import { Track, Driver, updateProgress, raceDistance } from './race.js';
 import { placeNpcs } from './npcs.js';
 import { ItemSystem, SPELLS } from './items.js';
-import { readControls, readMenu, rumble as padRumble } from './input.js';
+import { readControls, readMenu, primeMenu, rumble as padRumble } from './input.js';
 import { buildCourse, keepInside, makeMinimap } from './course.js';
 import { Fx, LOOKS } from './particles.js';
 import { EqFx, kartAnchor } from './eqfx.js';
 import { RACERS, TRACKS, showResults, loadRacers, opponents, racerLabel } from './ui.js';
 import { startFrontend, campaignRace, recordCampaignRace } from './frontend/frontend.js';
-import { settings, onSetting, DIFFICULTY } from './settings.js';
+import { settings, onSetting, DIFFICULTY, speedClass } from './settings.js';
 
 const params = new URLSearchParams(location.search);
 // errors anywhere end up in the console (and so in the desktop app's log file)
@@ -49,7 +50,9 @@ async function start(trackName, racer = { code: 'HUM', armor: 3 }, opts = {}) {
   const S = settings();
   const camp = opts.campaign ? campaignRace() : null;                    // a race of the campaign
   const level = DIFFICULTY[camp ? camp.difficulty : S.difficulty] || DIFFICULTY[1];
-  window.everkart?.log?.(`[race] ${trackName} racer ${racer.code}_${racer.armor} ${innerWidth}x${innerHeight} ${navigator.getGamepads?.().filter(Boolean).map((g) => g.id).join(', ') || 'no pad'}`);
+  const cls = speedClass(camp ? camp.speedClass ?? 1 : S.speedClass);   // the engine class: every kart's pace
+  TUNING.speedClass = cls.speed;
+  window.everkart?.log?.(`[race] ${trackName} ${cls.name} racer ${racer.code}_${racer.armor} ${innerWidth}x${innerHeight} ${navigator.getGamepads?.().filter(Boolean).map((g) => g.id).join(', ') || 'no pad'}`);
   hud.root.hidden = params.has('nohud');
   hud.msg.textContent = 'Loading…';
   const data = await (await fetch(`tracks/${trackName}.json`)).json();
@@ -119,7 +122,17 @@ async function start(trackName, racer = { code: 'HUM', armor: 3 }, opts = {}) {
   if (rivals.length < data.grid.length - 1) rivals = [...rivals, ...opponents(racer, data.grid.length - 1 - rivals.length)];
   const field = [you, ...rivals.slice(0, data.grid.length - 1)];
   // data.grid runs from the front row back; karts[0] is you, so take the slots last-first
-  const slots = [...data.grid].reverse();
+  const slots = [...data.grid].reverse().map((p) => {
+    // each slot on the road as it is built there: never past an edge (a kart's half width and a
+    // little from it), however narrow the road is on that side
+    const q = new THREE.Vector3(p[0], p[1], p[2]);
+    const j = track.nearest(q, track.open ? Math.max(0, track.start - 20) : track.n - 1).index;
+    const t = track.tangent(j), side = new THREE.Vector3(-t.z, 0, t.x);
+    const d = q.clone().sub(track.path[j]).dot(side);
+    const wr = (track.roadWR?.[j] ?? track.width) - 3.5, wl = (track.roadWL?.[j] ?? track.width) - 3.5;
+    const dc = THREE.MathUtils.clamp(d, -Math.max(0, wl), Math.max(0, wr));
+    return dc === d ? p : q.addScaledVector(side, dc - d).toArray();
+  });
   const karts = slots.map((p, i) => {
     const k = new Kart(COLORS[i], field[i].name);
     k.entry = field[i];
@@ -146,9 +159,21 @@ async function start(trackName, racer = { code: 'HUM', armor: 3 }, opts = {}) {
   const eqfx = new EqFx(scene, renderer, camera);
   await eqfx.load();
   const sfx = new Sfx(!params.has('mute'));          // EverQuest's own sound effects
+  // this race's weather (?weather=rain|snow forces it, for checks)
+  const wx = rollWeather(data.zone, S.weather, params.get('weather'));
+  const weather = wx ? new Weather(scene, wx, {
+    ground: (x, y, z) => cast(zone.collider, new THREE.Vector3(x, y, z), new THREE.Vector3(0, -1, 0), 60)?.point.y ?? null,
+    thunder: () => sfx.play('thunder', { vol: 0.8 }),
+  }) : null;
+  if (weather) {
+    weather.dress(scene, fogBase, sky);
+    lastLight = -1;
+    setLight((sky ? sky.userData.light : 1) * weather.lightNow);
+    window.everkart?.log?.(`[race] weather: ${wx.kind} ${wx.strength.toFixed(2)}`);
+  }
   await sfx.load();
   if (sfx.master) sfx.master.gain.value = 0.8 * S.sfxVolume;
-  const items = new ItemSystem(scene, track, karts, standings, fx, eqfx);
+  const items = new ItemSystem(scene, track, karts, standings, fx, eqfx, (x, y, z) => course.userData.roadQuery.at(x, y, z, true)?.h);
   items.sfx = sfx;
   const rolling = sfx.play('kart', { vol: 0, loop: true });  // your kart: the mine cart rolling
   let lastCount = null, bumpCool = 0, lastSpeed = 0;
@@ -156,7 +181,7 @@ async function start(trackName, racer = { code: 'HUM', armor: 3 }, opts = {}) {
   const auto = params.has('autopilot');
   const drivers = karts.map((k, i) => (i === 0 && !auto ? null :
     new Driver(k, track, ((i % 3) - 1) * 0.8, i === 0 ? 0.95 : Math.min(1, level.skill + 0.06 * Math.random()))));
-  for (const d of drivers) if (d) { d.rival = player; d.bandScale = level.band; }   // CPUs measure the gap to you
+  for (const d of drivers) if (d) { d.rival = player; d.bandScale = level.band; d.field = karts; }   // CPUs measure the gap to you, and see the karts around them
 
   // intro, as kart racers do it: a flyover down the course - a drone's runs along the road past
   // each of its sights (Hoshkar on his island, the raid, the monk's train, Phara Dar), cut
@@ -242,6 +267,7 @@ async function start(trackName, racer = { code: 'HUM', armor: 3 }, opts = {}) {
   let finishedAt = null;
   let resultsShown = false;
   let camYaw = null;
+  let rearWas = false;                            // looking behind last frame
   let paused = false;
   const pauseEl = document.getElementById('pause');
   const pauseButtons = [...pauseEl.querySelectorAll('button')];
@@ -251,6 +277,9 @@ async function start(trackName, racer = { code: 'HUM', armor: 3 }, opts = {}) {
     pauseEl.hidden = !paused;
     pauseSel = 0;
     pauseButtons[0].focus();
+    // the Start press that opened the menu is not also its OK (that pressed Resume at once: Start
+    // seemed to do nothing); Start again, or B, resumes
+    if (paused) primeMenu();
     if (window.__ekMusic) paused ? window.__ekMusic.pause() : window.__ekMusic.play().catch(() => {});
     sfx.pause(paused);
   }
@@ -362,33 +391,51 @@ async function start(trackName, racer = { code: 'HUM', armor: 3 }, opts = {}) {
     player.wasSpinning = player.spin > 0;
     if (player.turbo > 0 && !player.hadTurbo) padRumble(0.35, 150);
     player.hadTurbo = player.turbo > 0;
-    // karts bump each other
+    // karts bump each other: pushed apart, and only the speed along the contact is traded, as two
+    // equal karts would (a little bounce) - a kart shunted from behind is pushed on, the one behind
+    // loses what it gave; karts merely touching lose nothing (they used to lose 2% a frame each,
+    // so two CPUs nose to tail dragged each other down)
     for (let a = 0; a < karts.length; a++) {
       for (let b = a + 1; b < karts.length; b++) {
         const A = karts[a].pos, B = karts[b].pos;
         const dx = B.x - A.x, dz = B.z - A.z, dy = Math.abs(B.y - A.y);
         const d = Math.hypot(dx, dz);
         if (d < 5.5 && d > 1e-3 && dy < 5) {
-          const push = (5.5 - d) / 2;
-          A.x -= (dx / d) * push; A.z -= (dz / d) * push;
-          B.x += (dx / d) * push; B.z += (dz / d) * push;
-          karts[a].speed *= 0.98; karts[b].speed *= 0.98;
+          const nx = dx / d, nz = dz / d, push = (5.5 - d) / 2;
+          A.x -= nx * push; A.z -= nz * push;
+          B.x += nx * push; B.z += nz * push;
+          const va = karts[a].vel, vb = karts[b].vel;
+          const closing = (va.x - vb.x) * nx + (va.z - vb.z) * nz;   // A running into B
+          if (closing > 0) {
+            const j = closing * (1 + 0.25) / 2;
+            va.x -= nx * j; va.z -= nz * j;
+            vb.x += nx * j; vb.z += nz * j;
+          }
         }
       }
     }
     // camera: follows the kart's heading with a little lag, wider view at speed
-    camYaw ??= player.yaw;
-    let dy = player.yaw - camYaw;
+    // (a spin-out turns the kart, not the camera: it holds the way down the road, where the kart ends up)
+    const followYaw = player.spin > 0 && player.spinHead !== undefined ? player.spinHead : player.yaw;
+    camYaw ??= followYaw;
+    let dy = followYaw - camYaw;
     dy = Math.atan2(Math.sin(dy), Math.cos(dy));
     camYaw += dy * Math.min(1, dt * 6);
     const fwd = new THREE.Vector3(Math.sin(camYaw), 0, -Math.cos(camYaw));
+    // looking behind (X / Q held): the camera cuts to in front of the kart, looking back down the
+    // road at the racers behind - a cut both ways, as kart racers do it, never a swing round
+    const rear = !!ctl.lookBack && t >= -3 && !drivers[0];
+    const rs = rear ? -1 : 1;
     // big races (ogres, trolls, barbarians) sit tall in the cart: lift the camera over them
     const tall = Math.max(0, ((player.racer?.info?.height) || 6) - 6);
-    const want = player.pos.clone().addScaledVector(fwd, -14 - tall * 0.8).add(new THREE.Vector3(0, 6 + tall * 1.3, 0));
-    camIdeal.lerp(want, t < -3 ? 1 : 1 - Math.pow(0.0005, dt));
+    const want = player.pos.clone().addScaledVector(fwd, (-14 - tall * 0.8) * rs).add(new THREE.Vector3(0, 6 + tall * 1.3, 0));
+    const cut = rear !== rearWas;
+    rearWas = rear;
+    if (cut) camReach = null;                      // the walls are measured afresh for the new view
+    camIdeal.lerp(want, t < -3 || cut ? 1 : 1 - Math.pow(0.0005, dt));
     const intro = t < -3.5;
     if (intro && (skipAsked() || readMenu().ok)) t = -3.5;   // skip the intro
-    const fov = 70 + 14 * Math.min(1, Math.max(0, player.speed) / 80) + (player.turbo > 0 || player.boost > 0 ? 6 : 0);
+    const fov = 70 + 14 * Math.min(1, Math.max(0, player.speed) / (80 * cls.speed)) + (player.turbo > 0 || player.boost > 0 ? 6 : 0);
     camera.fov += (fov - camera.fov) * Math.min(1, dt * 4);
     camera.updateProjectionMatrix();
     // keep the camera inside the zone: in front of walls, above the floor
@@ -412,7 +459,7 @@ async function start(trackName, racer = { code: 'HUM', armor: 3 }, opts = {}) {
     if (floor && camPos.y < floor.point.y + 2.5) camPos.y = Math.min(floor.point.y + 2.5, topY);
     camera.position.copy(camPos);
     for (const k of karts) if (k !== player) k.mesh.visible = k.pos.distanceTo(camPos) > 6;   // never look through a kart
-    look.copy(player.pos).addScaledVector(fwd, 14).add(new THREE.Vector3(0, 3.5, 0));
+    look.copy(player.pos).addScaledVector(fwd, 14 * rs).add(new THREE.Vector3(0, 3.5, 0));
     camera.lookAt(look);
     if (intro) {
       const ti = t + 3.5 + INTRO;                     // seconds into the intro
@@ -557,7 +604,7 @@ async function start(trackName, racer = { code: 'HUM', armor: 3 }, opts = {}) {
     // the course's name over the flyover (nothing over the grid: the racers speak for themselves)
     if (t < -3.5 && t + 3.5 + INTRO < FLY) hud.msg.innerHTML = `<div style="position:fixed;left:4vw;bottom:7vh;text-align:left">`
       + `<div style="font-size:52px">${track.data.title || ''}</div>`
-      + `<div style="font-size:20px;opacity:.75">${track.open ? 'Start to finish' : `${LAPS} lap${LAPS === 1 ? '' : 's'}`} · Enter / A to skip</div></div>`;
+      + `<div style="font-size:20px;opacity:.75">${cls.name} · ${track.open ? 'Start to finish' : `${LAPS} lap${LAPS === 1 ? '' : 's'}`} · Enter / A to skip</div></div>`;
     else if (t < -3.5) hud.msg.innerHTML = '';
     else if (t < 0) hud.msg.textContent = t < -3 ? '' : String(Math.ceil(-t));
     else if (t < 1) hud.msg.textContent = 'GO!';
@@ -635,7 +682,9 @@ async function start(trackName, racer = { code: 'HUM', armor: 3 }, opts = {}) {
     npcs.update(dt, karts, eqfx);
     fx.update(dt);
     eqfx.update(dt);
-    if (sky) { sky.userData.update(camera, dt, params.has('day') ? parseFloat(params.get('day')) : DAY_MINUTES); setLight(sky.userData.light); }
+    if (sky) sky.userData.update(camera, dt, params.has('day') ? parseFloat(params.get('day')) : DAY_MINUTES);
+    if (weather) weather.update(dt, camera);
+    if (sky || weather) setLight(Math.min(1.4, (sky ? sky.userData.light : 1) * (weather ? weather.lightNow : 1)));
     zone.animate(dt);                                 // fire, lava, water: EQ's animated textures
     renderer.render(scene, camera);
     requestAnimationFrame(frame);

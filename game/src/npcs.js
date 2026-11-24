@@ -16,19 +16,36 @@ const DOWN = new THREE.Vector3(0, -1, 0);
 const UP = new THREE.Vector3(0, 1, 0);
 const cache = {};
 
-// what each player character carries and how it fights (EQ items from gequip.s3d)
-const LOADOUT = {
-  pc_HUM: { main: 'IT5', shield: 'IT203', style: 'melee' }, pc_BAM: { main: '2HNSWORD', style: 'two' },
-  pc_OGM: { main: 'IT25', style: 'two' }, pc_DWM: { main: 'IT18', shield: 'IT201', style: 'melee' },
-  pc_ERM: { main: 'WIZSTAFF', style: 'caster' }, pc_ELF: { main: 'IT16', style: 'caster' },
-  pc_HIF: { main: 'WIZSTAFF', style: 'caster' }, pc_DAF: { main: 'IT26', style: 'melee' },
-  pc_HOM: { main: 'IT1', off: 'IT1', style: 'dual' }, pc_GNF: { main: 'WIZSTAFF', style: 'caster' },
-  pc_DWM_pl: { main: 'IT18', shield: 'IT207', style: 'melee' }, pc_DAF_pl: { main: '2HNSWORD', style: 'two' },
-  pc_ERM_pl: { main: 'IT13', shield: 'IT203', style: 'melee' }, pc_HIF_pl: { main: 'IT2', shield: 'IT200', style: 'melee' },
-  pc_ELF_ch: { main: 'IT2', off: 'IT1', style: 'dual' }, pc_HUM_mnk: { style: 'monk' },
-  pc_HUM_lo: { main: 'IT1', style: 'melee' }, pc_ELF_lo: { main: 'IT16', style: 'caster' }, pc_DWM_lo: { main: 'IT18', style: 'melee' },
-  pc_BAM_lo: { main: 'IT3', style: 'melee' }, pc_GNF_lo: { main: 'WIZSTAFF', style: 'caster' }, pc_HIF_lo: { main: 'IT1', style: 'melee' },
+// how each race likes to fight (the weights of each style); every fighter is armed at random for
+// its style from EverQuest's held items (public/items/pools.json: one-handers, two-handers,
+// staves, shields - tools/export_npcs.py ITEM_POOLS)
+const STYLE_WEIGHTS = {
+  OGM: { two: 0.7, melee: 0.3 }, BAM: { two: 0.6, melee: 0.3, dual: 0.1 }, TRM: { two: 0.6, melee: 0.3, dual: 0.1 },
+  DWM: { melee: 0.6, two: 0.4 }, HUM: { melee: 0.4, two: 0.2, dual: 0.2, caster: 0.2 },
+  ELF: { caster: 0.4, melee: 0.3, dual: 0.3 }, HIF: { caster: 0.6, melee: 0.4 }, ERM: { caster: 0.7, melee: 0.3 },
+  DAF: { caster: 0.4, melee: 0.3, dual: 0.3 }, HOM: { dual: 0.5, melee: 0.5 }, GNF: { caster: 0.7, melee: 0.3 },
 };
+let POOLS = null;
+function gearFor(file) {
+  if (file.endsWith('_mnk')) return { style: 'monk' };
+  const w = STYLE_WEIGHTS[file.slice(3, 6)] || { melee: 0.5, two: 0.25, caster: 0.25 };
+  let r = Math.random(), style = 'melee';
+  for (const [k, v] of Object.entries(w)) { if ((r -= v) <= 0) { style = k; break; } }
+  const any = (pool) => (POOLS?.[pool]?.length ? POOLS[pool][Math.floor(Math.random() * POOLS[pool].length)] : null);
+  if (style === 'melee') return { main: any('one'), shield: any('shield'), style };
+  if (style === 'dual') return { main: any('one'), off: any('one'), style };
+  if (style === 'two') return { main: any('two'), style };
+  return { main: any('staff'), style: 'caster' };
+}
+// a player character in one of its armor sets: the track's own choice plus two more (pc_<race>_a<n>)
+function heroFiles(list) {
+  const out = [];
+  for (const f of list) {
+    out.push(f);
+    if (/^pc_[A-Z]{3}$/.test(f)) out.push(...[1, 2, 3].sort(() => Math.random() - 0.5).slice(0, 2).map((a) => `${f}_a${a}`));
+  }
+  return out;
+}
 // EQ's animation codes for each way of fighting (a monster uses whichever attacks it has)
 const STYLE_CLIPS = {
   melee: ['C02', 'C07'], two: ['C03', 'C04'], dual: ['C02', 'C06'], caster: ['T04', 'T05', 'T06'],
@@ -80,13 +97,14 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
   const tooClose = (p, r) => placed.some((s) => s.npc.position.distanceTo(p) < r + s.radius + 6);
   const named = [];                                  // named NPCs (Hoshkar, Phara Dar ...): the intro can show them
 
-  // the items each loadout uses, loaded once
+  // EverQuest's held items, loaded once
+  POOLS ??= await fetch('items/pools.json').then((r) => r.json()).catch(() => ({}));
   const items = {};
-  for (const name of new Set(Object.values(LOADOUT).flatMap((l) => [l.main, l.off, l.shield]).filter(Boolean))) items[name] = await loadItem(name);
+  await Promise.all([...new Set(Object.values(POOLS).flat())].map(async (name) => { items[name] = await loadItem(name); }));
 
   function spawn(model, height, pos, yaw, opts = {}) {
     const npc = cloneSkinned(model.root);
-    const gear = !opts.unarmed && LOADOUT[model.file];
+    const gear = !opts.unarmed && model.file.startsWith('pc_') && gearFor(model.file);
     if (gear) {                                        // weapons in hand, shield on the arm
       const bone = (tail) => { let b = null; npc.traverse((o) => { if (!b && o.name.endsWith(tail)) b = o; }); return b; };
       const hold = (item, tail) => { const b = item && items[item] && bone(tail); if (b) b.add(items[item].clone()); };
@@ -116,7 +134,35 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
     return s;
   }
 
-  // a free spot beside the road at path point i: { spot, room, out (unit vector away from the road), tan }
+  // on the road (its real width on each side, its kerbs and walls, and a margin): nothing that
+  // lives beside the track stands or walks there. Path points hashed on a 32-unit grid.
+  const ROAD_CELL = 32, roadHash = new Map();
+  for (let j = 0; j < track.n; j++) {
+    const k = `${Math.floor(track.path[j].x / ROAD_CELL)},${Math.floor(track.path[j].z / ROAD_CELL)}`;
+    if (!roadHash.has(k)) roadHash.set(k, []);
+    roadHash.get(k).push(j);
+  }
+  const roadEdge = (j, sg) => (sg > 0 ? (track.roadWR?.[j] ?? track.width) : (track.roadWL?.[j] ?? track.width));
+  const onRoadAt = (x, z, y, margin = 6) => {
+    const cx = Math.floor(x / ROAD_CELL), cz = Math.floor(z / ROAD_CELL);
+    const reach = Math.ceil((46 + margin + 8) / ROAD_CELL);
+    for (let a = cx - reach; a <= cx + reach; a++) {
+      for (let b = cz - reach; b <= cz + reach; b++) {
+        for (const j of roadHash.get(`${a},${b}`) || []) {
+          const q = track.path[j];
+          if (Math.abs(q.y - y) > 20) continue;
+          const t = track.tangent(j);
+          const d = (x - q.x) * -t.z + (z - q.z) * t.x;               // across: + right
+          const along = Math.abs((x - q.x) * t.x + (z - q.z) * t.z);
+          if (along < 6 && d < roadEdge(j, 1) + 4 + margin && d > -(roadEdge(j, -1) + 4 + margin)) return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  // a free spot beside the road at path point i, `dist` beyond the road's edge on that side:
+  // { spot, room, out (unit vector away from the road), tan }
   function beside(i, dist, radius, height, only = 0) {
     const p = track.path[i];
     const tan = track.tangent(i);
@@ -127,19 +173,14 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
       const dir = side.clone().multiplyScalar(sg);
       const hit = cast(collider, o, dir, 400);
       const room = hit ? hit.distance : 400;
-      if (room < dist + radius) continue;
-      const spot = o.clone().addScaledVector(dir, dist);
+      const out = roadEdge(i, sg) + 4 + dist;                       // past the road's edge, its kerb and wall
+      if (room < out + radius) continue;
+      const spot = o.clone().addScaledVector(dir, out);
       const fy = ground(collider, spot);
       if (fy === null || Math.abs(fy - p.y) > 40) continue;
       const at = new THREE.Vector3(spot.x, fy, spot.z);
       if (cast(collider, at.clone().add(new THREE.Vector3(0, 1, 0)), UP, height * 1.05)) continue;
-      // not on another stretch of the road
-      let onRoad = false;
-      for (let j = 0; j < track.n && !onRoad; j += 2) {
-        const q = track.path[j];
-        if ((q.x - at.x) ** 2 + (q.z - at.z) ** 2 < (track.width + radius + 3) ** 2 && Math.abs(q.y - at.y) < 20) onRoad = true;
-      }
-      if (onRoad || tooClose(at, radius)) continue;
+      if (onRoadAt(at.x, at.z, at.y, radius + 2) || tooClose(at, radius)) continue;   // nor on another stretch
       if (!best || room > best.room) best = { spot: at, room, out: dir, tan };
     }
     return best;
@@ -159,13 +200,13 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
       const base = Math.floor(((slot + 0.5) / total) * track.n);
       for (let tryI = 0; tryI < 40; tryI++) {
         const i = (base + tryI * 7) % track.n;
-        const b = beside(i, track.width + 3.5 + radius + Math.random() * 5, radius, spec.height);
+        const b = beside(i, 3.5 + radius + Math.random() * 5, radius, spec.height);
         if (!b) continue;
         const s = spawn(looks[c % looks.length], spec.height, b.spot, faceYaw(b.out.clone().negate()) + (Math.random() - 0.5) * 0.5,
           { model: spec.model, index: i, breath: spec.breath, cool: 2 + Math.random() * 3 });
         if (spec.feature && !feature) feature = { pos: b.spot.clone(), height: spec.height, lookH: spec.height * 0.7, actor: s };
         if (s.walk && (spec.height <= 10 || spec.wander)) {      // patrol along the road edge
-          const reach = spec.wander ? 45 : 9;
+          const reach = spec.wander ? 45 : 15 + Math.random() * 45;   // each its own beat, some a long walk
           s.patrol = { a: b.spot.clone().addScaledVector(b.tan, -reach), b: b.spot.clone().addScaledVector(b.tan, reach),
             toB: true, speed: spec.wander ? spec.height * 0.35 : 4 + Math.random() * 2 };
           s.walk.timeScale = THREE.MathUtils.clamp(s.patrol.speed / s.walkSpeed, 0.4, 2.5);   // no sliding feet
@@ -193,10 +234,10 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
     if (sc.pos[1] == null) {                          // never on the road: step out past its edge
       let j = 0;
       for (let q = 1; q < track.n; q++) if ((track.path[q].x - p.x) ** 2 + (track.path[q].z - p.z) ** 2 < (track.path[j].x - p.x) ** 2 + (track.path[j].z - p.z) ** 2) j = q;
-      const near = track.path[j], need = track.width + 8 + sc.height * 0.4;
+      const near = track.path[j], tan = track.tangent(j), side = new THREE.Vector3(-tan.z, 0, tan.x);
+      const sg = (p.x - near.x) * side.x + (p.z - near.z) * side.z >= 0 ? 1 : -1;
+      const need = roadEdge(j, sg) + 8 + sc.height * 0.4;
       if (Math.hypot(near.x - p.x, near.z - p.z) < need) {
-        const tan = track.tangent(j), side = new THREE.Vector3(-tan.z, 0, tan.x);
-        const sg = (p.x - near.x) * side.x + (p.z - near.z) * side.z >= 0 ? 1 : -1;
         p.set(near.x + side.x * need * sg, near.y, near.z + side.z * need * sg);
         p.y = ground(collider, p, 60) ?? near.y;
         sc = { ...sc, yaw: THREE.MathUtils.radToDeg(faceYaw(side.clone().multiplyScalar(-sg))) };
@@ -225,24 +266,34 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
 
   // --- 3. skirmishes: { count, heroes: [files], heroHeight, foes: [models], foeHeight, at: 'centroid'? }
   for (const sk of data.skirmishes || []) {
-    const heroes = (await Promise.all(sk.heroes.map((h) => loadModel(h.includes('_') ? h : `${zone}_${h}`)))).filter(Boolean);
-    const foes = (await Promise.all(sk.foes.map((f) => loadModel(`${zone}_${f}`)))).filter(Boolean);
+    const heroes = (await Promise.all(heroFiles(sk.heroes).map((h) => loadModel(h.includes('_') ? h : `${zone}_${h}`)))).filter(Boolean);
+    // the foes: the skirmish's own, and the zone's other creatures of a fighting size (not its
+    // citizens and guards) - every fight along the road a different matchup
+    const foeSpecs = [...sk.foes.map((f) => ({ model: f, height: sk.foeHeight || 7 })),
+      ...(data.npcs || []).filter((n) => n.height >= 2 && n.height <= 10 && !/^(Q|FPM|KAM|KAF|GFM)/.test(n.model) && !sk.foes.includes(n.model))];
+    const foes = (await Promise.all(foeSpecs.map(async (f) => ({ m: await loadModel(`${zone}_${f.model}`), h: f.height })))).filter((f) => f.m);
     if (!heroes.length || !foes.length) continue;
-    const hh = sk.heroHeight || 6, fh = sk.foeHeight || 7;
+    const hh = sk.heroHeight || 6, fh = sk.foeHeight || 7;   // (the spacing of the fights along the road)
+    // a fight: one on one, two adventurers on one creature, or one against two
     const pair = (center, along) => {
-      const gap = (hh + fh) * 0.32;
-      const a = center.clone().addScaledVector(along, -gap), b = center.clone().addScaledVector(along, gap);
-      for (const q of [a, b]) q.y = ground(collider, q) ?? center.y;
-      const hero = spawn(heroes[Math.floor(Math.random() * heroes.length)], hh * (0.9 + Math.random() * 0.2), a, faceYaw(along), { fighter: true });
-      const foe = spawn(foes[Math.floor(Math.random() * foes.length)], fh * (0.9 + Math.random() * 0.2), b, faceYaw(along.clone().negate()), { fighter: true });
-      for (const f of [hero, foe]) {
+      const foe0 = foes[Math.floor(Math.random() * foes.length)], fh = foe0.h;
+      const r = Math.random(), nh = r < 0.25 ? 2 : 1, nf = r > 0.8 ? 2 : 1;
+      const gap = (hh + fh) * 0.32, across = new THREE.Vector3(-along.z, 0, along.x);
+      const spots = (n, sg) => Array.from({ length: n }, (_, k) => center.clone().addScaledVector(along, sg * gap)
+        .addScaledVector(across, n > 1 ? (k - 0.5) * (sg < 0 ? hh : fh) * 0.9 : 0));
+      const hs = spots(nh, -1), fs = spots(nf, 1);
+      for (const q of [...hs, ...fs]) q.y = ground(collider, q) ?? center.y;
+      if ([...hs, ...fs].some((q) => onRoadAt(q.x, q.z, q.y, Math.max(hh, fh) * 0.5))) return false;   // a fighter on the road: elsewhere
+      const heroesHere = hs.map((q) => spawn(heroes[Math.floor(Math.random() * heroes.length)], hh * (0.9 + Math.random() * 0.2), q, faceYaw(along), { fighter: true }));
+      const foesHere = fs.map((q) => spawn(foe0.m, fh * (0.9 + Math.random() * 0.2), q, faceYaw(along.clone().negate()), { fighter: true }));
+      for (const f of [...heroesHere, ...foesHere]) {
         if (!f.attack.length) continue;
         if (f.idle) f.idle.stop();
         f.swing = 0;
-        f.attack[0].play();
-        f.attack[0].time = Math.random();
+        f.attack[Math.floor(Math.random() * f.attack.length)].play().time = Math.random();
       }
-      fights.push({ hero, foe, cast: 2 + Math.random() * 5 });
+      for (let k = 0; k < Math.max(nh, nf); k++) fights.push({ hero: heroesHere[k % nh], foe: foesHere[k % nf], cast: 2 + Math.random() * 5 });
+      return true;
     };
     if (sk.at === 'centroid') {
       const c = track.path.reduce((s, p) => s.add(p), new THREE.Vector3()).divideScalar(track.n);
@@ -255,14 +306,14 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
       if (sk.feature && !feature) feature = { pos: c.clone(), height: Math.max(hh, fh) * 2.2 };
       continue;
     }
-    for (let k = 0; k < sk.count; k++) {
-      const base = Math.floor(((k + 0.3) / sk.count) * track.n);
+    const count = Math.min(sk.count, 16);                 // enough to keep the roadside busy, not a parade
+    for (let k = 0; k < count; k++) {
+      const base = Math.floor(((k + 0.3) / count) * track.n);
       for (let tryI = 0; tryI < 30; tryI++) {
         const i = (base + tryI * 5) % track.n;
         const r = Math.max(hh, fh);
-        const b = beside(i, track.width + 4 + r + Math.random() * 7, r * 1.3, r);
-        if (!b) continue;
-        pair(b.spot, Math.random() < 0.5 ? b.tan.clone() : b.tan.clone().negate());
+        const b = beside(i, r + Math.random() * 7, r * 1.3, r);
+        if (!b || !pair(b.spot, Math.random() < 0.5 ? b.tan.clone() : b.tan.clone().negate())) continue;
         if (sk.feature && !feature) feature = { pos: b.spot.clone(), height: Math.max(hh, fh) * 1.6 };
         break;
       }
@@ -282,14 +333,6 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
     const from = yHint ?? topY;
     const hit = cast(collider, new THREE.Vector3(x, from + 25, z), DOWN, from + 25 + 4000);
     return hit ? hit.point.y : null;
-  };
-  // on the road (with a margin): wanderers and herds keep off it
-  const onRoadAt = (x, z, y) => {
-    for (let j = 0; j < track.n; j += 2) {
-      const q = track.path[j], r = (track.roadWR ? Math.max(track.roadWR[j], track.roadWL[j]) : track.width) + 6;
-      if ((q.x - x) ** 2 + (q.z - z) ** 2 < r * r && Math.abs(q.y - y) < 20) return true;
-    }
-    return false;
   };
   const near = (c, r, yHint, offRoad = false) => {     // a spot on the ground within r of c
     for (let k = 0; k < 16; k++) {
@@ -321,7 +364,7 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
       for (const k of [1, 0.6, 0.35]) {
         for (let tryI = 0; tryI < 40 && !c; tryI++) {
           const i = (Math.floor(v.along * track.n) + tryI * 6) % track.n;
-          const b = beside(i, track.width + 4 + (R * 0.6 + size * 0.5) * k, (R * 0.5 + size * 0.4) * k, size * k);
+          const b = beside(i, (R * 0.6 + size * 0.5) * k, (R * 0.5 + size * 0.4) * k, size * k);
           if (b) c = b.spot.clone();
         }
       }
@@ -329,17 +372,24 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
     if (!c) { console.warn(`vignette "${v.title}": no place found`); continue; }
     let height = 6;
     if (v.kind === 'fight') {
-      const heroes = (await Promise.all(v.heroes.map((h) => loadModel(fileOf(h))))).filter(Boolean);
+      const heroes = (await Promise.all(heroFiles(v.heroes).map((h) => loadModel(fileOf(h))))).filter(Boolean);
       const foes = (await Promise.all(v.foes.map((f) => loadModel(fileOf(f))))).filter(Boolean);
       if (!heroes.length || !foes.length) continue;
       const hh = v.heroHeight || 6, fh = v.foeHeight || 7;
       height = Math.max(hh, fh);
       for (let k = 0; k < (v.pairs || 3); k++) {
-        const at = k === 0 ? c.clone() : near(c, R);
+        // each pair off the road (both fighters): a few tries round the centre, else no pair
         const along = new THREE.Vector3(Math.cos(k * 2.4), 0, Math.sin(k * 2.4));
         const gap = (hh + fh) * 0.32;
-        const a = at.clone().addScaledVector(along, -gap), b = at.clone().addScaledVector(along, gap);
-        for (const q of [a, b]) q.y = groundAt(q.x, q.z, at.y + 20) ?? at.y;
+        let a = null, b = null;
+        for (let tryK = 0; tryK < 12 && !a; tryK++) {
+          const at = k === 0 && tryK === 0 ? c.clone() : near(c, R, undefined, true);
+          if (!at) continue;
+          const pa = at.clone().addScaledVector(along, -gap), pb = at.clone().addScaledVector(along, gap);
+          for (const q of [pa, pb]) q.y = groundAt(q.x, q.z, at.y + 20) ?? at.y;
+          if (![pa, pb].some((q) => onRoadAt(q.x, q.z, q.y, height * 0.5))) [a, b] = [pa, pb];
+        }
+        if (!a) continue;
         const hero = spawn(heroes[k % heroes.length], hh * (0.92 + Math.random() * 0.16), a, faceYaw(along), { fighter: true });
         const foe = spawn(foes[k % foes.length], fh * (0.92 + Math.random() * 0.16), b, faceYaw(along.clone().negate()), { fighter: true });
         for (const f of [hero, foe]) {
@@ -376,7 +426,7 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
     } else if (v.kind === 'raid') {
       // a raid: a ring of player characters round a big monster, the melee close in, the casters
       // further back casting; the monster turns on them and breathes on them now and then
-      const heroes = (await Promise.all(v.heroes.map((h) => loadModel(fileOf(h))))).filter(Boolean);
+      const heroes = (await Promise.all(heroFiles(v.heroes).map((h) => loadModel(fileOf(h))))).filter(Boolean);
       const fm = (v.foeVariant !== undefined && await loadModel(`${zone}_${v.foe}_v${v.foeVariant}`)) || await loadModel(fileOf(v.foe));
       if (!heroes.length || !fm) continue;
       const fh = v.foeHeight || 40, hh = v.heroHeight || 6.5;
@@ -473,7 +523,7 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
           const c = crowd[Math.floor(Math.random() * crowd.length)];
           const h = (tall[c.f] || 6) * (0.92 + Math.random() * 0.16);
           const i = ((step % track.n) + track.n) % track.n;
-          const b = beside(i, track.width + 4 + h * 0.4 + Math.random() * 4, h * 0.3, h, sg);
+          const b = beside(i, h * 0.4 + Math.random() * 4, h * 0.3, h, sg);
           if (!b) continue;
           const s = spawn(c.m, h, b.spot, faceYaw(b.out.clone().negate()) + (Math.random() - 0.5) * 0.6, { crowd: true, unarmed: true });
           s.radius = h * 0.2;                              // shoulder to shoulder
@@ -666,7 +716,7 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
           d.normalize();
           const nextP = s.npc.position.clone().addScaledVector(d, P.speed * dt);
           const gy = ground(collider, nextP);
-          if (gy === null || Math.abs(gy - s.npc.position.y) > 6) P.toB = !P.toB;      // edge or wall: turn round
+          if (gy === null || Math.abs(gy - s.npc.position.y) > 6 || onRoadAt(nextP.x, nextP.z, gy, s.radius)) P.toB = !P.toB;   // edge, wall or road: turn round
           else { s.npc.position.copy(nextP).setY(gy); s.npc.rotation.y = faceYaw(d); }
         }
         continue;

@@ -227,6 +227,12 @@ not with a one-off hack.
      `face_at: [x, y]` (a point, e.g. the road onto its island), or `yaw` (degrees) — named NPCs.
      Check each from the road (`road_shots.mjs` at the stretch before it): it must look at you.
    - `npcs3d`: `{model, count, height, variants?, wander?}` — common creatures by the road.
+     `height` is the model's height in its rest pose: a creature that rests flat (a bat with its
+     wings spread: 3 tall, 23 across) needs a small value (bats: 1.2, about a 9-unit wingspan).
+     Look at each new creature whole (`tools/npcview.html`) before placing it: the exporter once
+     cut every face longer than half a model's height, which took the bats' wings, the snakes'
+     bodies and parts of spiders, beetles and dragons (`keep_faces` in `tools/eq_chr.py` now
+     measures the model's largest extent).
 
 ### B3. Life off the track (the Sega touch)
 `vignettes` — each is in the world all race, and a sight the intro's flyover passes:

@@ -32,6 +32,20 @@ def _quat_matrix(w, x, y, z):
                      [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]])
 
 
+def keep_faces(verts, tris):
+    """The faces to keep: a few player-race bones carry bad rest data (HUM/BAM hip) that stretches
+    faces across the model - drop a face longer than half the model's size. The size is the model's
+    largest extent in any direction, not its height: a bat or a bird rests with its wings spread
+    flat (3 tall, 23 across), a snake lies along the ground - measured by height, their wings and
+    bodies were cut away."""
+    size = lambda v: max(float(np.ptp(v, axis=0).max()), 1e-6)
+    edge = np.ptp(verts[tris], axis=1).max(axis=1)
+    ok = edge < 0.5 * size(verts) + 1.0
+    if not ok.all():
+        ok &= edge < 0.5 * size(verts[np.unique(tris[ok])]) + 1.0
+    return ok
+
+
 class Characters:
     def __init__(self, zone=None, archive=None):
         """zone: reads Everquest/<zone>_chr.s3d; archive: any character .s3d path."""
@@ -326,12 +340,7 @@ class Characters:
             base += len(v)
         verts, uvs, tris = np.concatenate(verts), np.concatenate(uvs), np.array(tris)
         self.last_joints = np.concatenate(joints)
-        # a few player-race bones carry bad rest data (HUM/BAM hip): drop the stretched faces
-        edge = np.ptp(verts[tris], axis=1).max(axis=1)
-        ok = edge < 0.5 * max(np.ptp(verts[:, 2]), 1e-6) + 1.0
-        if not ok.all():
-            core = verts[np.unique(tris[ok])]
-            ok &= edge < 0.5 * np.ptp(core[:, 2]) + 1.0
+        ok = keep_faces(verts, tris)
         tri_tex = [x for x, k in zip(tri_tex, ok) if k]
         self.last_materials = [x for x, k in zip(self.last_materials, ok) if k]
         return verts, uvs, tris[ok], tri_tex

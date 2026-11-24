@@ -278,12 +278,26 @@ HEROES = [("pc_HUM", "HUM", 3), ("pc_ELF", "ELF", 1), ("pc_DWM", "DWM", 2), ("pc
           ("pc_GNF_lo", "GNF", 1), ("pc_HIF_lo", "HIF", 0),
           # raiders in their best (Kunark-era plate and chain), a monk in monk's robes
           ("pc_HUM_mnk", "HUM", 4), ("pc_DWM_pl", "DWM", 3), ("pc_DAF_pl", "DAF", 3), ("pc_ERM_pl", "ERM", 3),
-          ("pc_HIF_pl", "HIF", 3), ("pc_ELF_ch", "ELF", 2)]
+          ("pc_HIF_pl", "HIF", 3), ("pc_ELF_ch", "ELF", 2), ("pc_TRM", "TRM", 2)]
+# every fighter race again in leather, chain and plate (pc_<race>_a<n>): no two fights dressed alike
+HEROES += [(f"pc_{m}_a{a}", m, a) for m in ("HUM", "ELF", "DWM", "HIF", "BAM", "ERM", "DAF", "HOM", "OGM", "GNF", "TRM")
+           for a in (1, 2, 3)]
 
 
-# EQ's held items (gequip.s3d): weapons and shields for the player characters beside the track
-ITEMS = ["IT1", "IT2", "IT3", "IT5", "IT13", "IT16", "IT18", "IT25", "IT26", "IT200", "IT201", "IT203", "IT207",
-         "IT220", "WIZSTAFF", "2HNSWORD"]
+# EQ's held items (gequip.s3d) for the fighters beside the track, by kind (known from their textures:
+# the rest of gequip is tools, books, instruments, food) - game/src/npcs.js arms each fighter from these
+ITEM_POOLS = {
+    "one": ["IT1", "IT26", "IT34", "IT57", "IT58", "IT20", "IT41", "IT42", "IT44", "IT22", "IT76", "IT85", "IT86", "IT87",
+            "IT93", "IT95", "IT97", "IT139", "IT5", "IT50", "IT90", "IT7", "IT18", "IT19", "IT37", "IT31", "IT102", "IT112",
+            "IT35", "IT51", "IT14", "IT59", "IT43", "IT3", "IT83", "IT84"],
+    "two": ["2HNSWORD", "IT53", "IT24", "IT25", "IT60", "IT80", "IT9", "IT88", "IT92", "IT23", "IT16", "IT17", "IT30", "IT79",
+            "IT39", "IT49", "IT33"],
+    "staff": ["WIZSTAFF", "IT45", "IT29", "IT96", "IT101", "IT111", "IT126", "IT127", "IT122", "IT123", "IT13"],
+    "shield": ["IT200", "IT201", "IT202", "IT203", "IT204", "IT205", "IT206", "IT207", "IT208", "IT209", "IT211", "IT212",
+               "IT213", "IT214", "IT215", "IT216", "IT217", "IT218", "IT219", "IT220", "IT221", "IT222", "IT223", "IT224",
+               "IT225", "IT226", "IT227", "IT229", "IT230"],
+}
+ITEMS = [i for pool in ITEM_POOLS.values() for i in pool]
 
 
 def export_items(names=ITEMS):
@@ -323,6 +337,7 @@ def export_items(names=ITEMS):
             continue
         g.node(name, prims)
         g.save(out / f"{name}.glb")
+    (out / "pools.json").write_text(json.dumps(ITEM_POOLS))   # the game arms its fighters from these
     print(f"  items: {len(names)} held items exported")
 
 

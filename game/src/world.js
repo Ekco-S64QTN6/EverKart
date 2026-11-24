@@ -28,8 +28,13 @@ export const ZONE_HEADER = {
   'northkarana.glb': { sky: 1, fog: [200, 220, 235], fogClip: [10, 1000], clip: [600, 1800] },   // estimated: no header on record
   'ecommons.glb': { sky: 1, fog: [210, 215, 200], fogClip: [10, 1000], clip: [600, 1800] },   // estimated: no header on record
 };
-// sky.wld's sets: the sky layer and the cloud layer of each
-const SKY_SETS = { 1: ['normalsky', 'normalcloud'], 2: ['desertsky', 'desertcloud'], 5: ['redcloud', 'redcloud'] };
+// sky.wld's sets (LAYER<n>1 and LAYER<n>3): the sky layer, the cloud layer, and how many times
+// each texture repeats across the dome - EverQuest projects them flat from above. Sky 0 is no
+// dome at all: the zone's fog colour is the sky (Greater Faydark, Everfrost, Nektulos, Growth).
+const SKY_SETS = {
+  1: ['normalsky', 'normalcloud', 8.4, 9.2], 2: ['desertsky', 'desertcloud', 4.2, 4.6],
+  3: ['normalsky', 'normalcloud', 4.6, 4.6], 4: ['cottonysky', 'fluffycloud', 4.2, 4.6], 5: ['redcloud', 'redcloud', 5.0, 5.0],
+};
 // What the header does not carry: how bright the baked light is drawn (display brightness,
 // as EQ's own values are), whether the zone is under the open sky (it shows its sky set; 0
 // and 1 are the default sky), and the hour a race starts at. Nektulos is played at night,
@@ -41,7 +46,7 @@ export const ZONE_LOOK = {
   'oasis.glb': { ambient: 0.5, gain: 1.4, open: true, hour: 10 },
   'everfrost.glb': { ambient: 0.5, gain: 1.3, open: true, hour: 8 },
   'nektulos.glb': { ambient: 0.3, gain: 1.4, open: true, hour: 23, lockHour: true },
-  'lavastorm.glb': { ambient: 0.45, gain: 1.5, open: true, hour: 16, skySet: ['redsky', 'redcloud'] },   // sky.s3d's red sky
+  'lavastorm.glb': { ambient: 0.45, gain: 1.5, open: true, hour: 16 },
   'fearplane.glb': { ambient: 0.45, gain: 1.5, open: true, hour: 14 },
   'hateplane.glb': { ambient: 0.4, gain: 1.6 },
   'growthplane.glb': { ambient: 0.5, gain: 1.4, open: true, hour: 11 },
@@ -63,8 +68,8 @@ function zoneLook(file) {
   look.fog = [look.sky, h.fogClip[0], Math.max(FOG_MIN, h.fogClip[1])];
   look.far = Math.max(look.fog[2] + 40, h.clip?.[1] ?? 2000);   // view distance: the zone's far clip
   look.outdoor = !!look.open;
-  const set = look.skySet || SKY_SETS[h.sky] || SKY_SETS[1];
-  if (look.outdoor) look.dome = { sky: set[0], cloud: set[1], hour: look.hour ?? 10, lockHour: !!look.lockHour, horizon: look.fogRgb };
+  const set = SKY_SETS[h.sky] || null;                 // (the zone's own header; 0: no dome)
+  if (look.outdoor) look.dome = { set, hour: look.hour ?? 10, lockHour: !!look.lockHour, horizon: look.fogRgb };
   return look;
 }
 
@@ -173,20 +178,26 @@ export function cast(collider, origin, dir, far) {
 export function makeSky(spec = {}) {
   const tl = new THREE.TextureLoader();
   const dome = new THREE.Group();
-  const layer = (file, radius, repeat, opacity) => {
+  // a layer: the texture projected flat from above across the dome, `tiles` times edge to edge
+  // (as EverQuest's sky meshes are mapped), so the clouds shrink into the distance at the horizon
+  const layer = (file, radius, tiles, opacity) => {
     const tex = tl.load(`sky/${file}.png`);
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(repeat, repeat / 2);
-    const m = new THREE.Mesh(new THREE.SphereGeometry(radius, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.55),
+    const geo = new THREE.SphereGeometry(radius, 48, 24, 0, Math.PI * 2, 0, Math.PI * 0.55);
+    const pos = geo.attributes.position, uv = geo.attributes.uv;
+    for (let k = 0; k < pos.count; k++) uv.setXY(k, (pos.getX(k) / radius) * tiles / 2, (pos.getZ(k) / radius) * tiles / 2);
+    geo.scale(1, 0.28, 1);                                   // a shallow dome, as EverQuest's (its rim just below the eye)
+    const m = new THREE.Mesh(geo,
       new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide, fog: false, depthWrite: false,
         transparent: opacity < 1, opacity, blending: opacity < 1 ? THREE.AdditiveBlending : THREE.NormalBlending }));
     m.renderOrder = -10;
     dome.add(m);
     return m;
   };
-  const sky = layer(spec.sky || 'normalsky', 5000, 6, 1);
-  const clouds = layer(spec.cloud || 'normalcloud', 4800, 8, 0.55);
+  const set = spec.set;                                   // null: no dome (the fog colour is the sky)
+  const sky = set && layer(set[0], 5000, set[2], 1);
+  const clouds = set && layer(set[1], 4800, set[3], 0.55);
   const body = (file, size) => {
     const tex = tl.load(`sky/${file}.png`);
     tex.colorSpace = THREE.SRGBColorSpace;
@@ -198,6 +209,13 @@ export function makeSky(spec = {}) {
     return sp;
   };
   const sun = body('sun', 520), moon = body('moon', 420);
+  sun.visible = moon.visible = !!set;
+  // an overcast over it all in rain or snow (dome.userData.overcast 0 .. 1): a grey sky, the sun hidden
+  const cover = new THREE.Mesh(new THREE.SphereGeometry(4600, 32, 12, 0, Math.PI * 2, 0, Math.PI * 0.55).scale(1, 0.28, 1),
+    new THREE.MeshBasicMaterial({ color: 0x8a8f96, side: THREE.BackSide, transparent: true, opacity: 0, depthWrite: false, fog: false }));
+  cover.renderOrder = -8.5;
+  cover.visible = false;
+  dome.add(cover);
   // the fog colour rises from the horizon, as the zone's fog does over distance
   const band = new THREE.Mesh(new THREE.CylinderGeometry(4700, 4700, 1500, 32, 1, true),
     new THREE.ShaderMaterial({ side: THREE.BackSide, transparent: true, depthWrite: false, fog: false,
@@ -206,6 +224,7 @@ export function makeSky(spec = {}) {
       fragmentShader: 'uniform vec3 c; varying float h; void main(){ gl_FragColor = vec4(c, pow(1.0 - h, 1.6) * 0.9); }' }));
   band.position.y = 600;
   band.renderOrder = -8;
+  band.visible = !!set;
   dome.add(band);
   let hour = spec.hour ?? 10;
   const DAY = new THREE.Color(1, 1, 1), DUSK = new THREE.Color(1.0, 0.55, 0.38), NIGHT = new THREE.Color(0.07, 0.09, 0.2);
@@ -219,15 +238,21 @@ export function makeSky(spec = {}) {
     const day = THREE.MathUtils.smoothstep(s, -0.12, 0.25);              // 0 night .. 1 day
     const dusk = Math.max(0, 1 - Math.abs(s) / 0.22);                    // near the horizon
     tint.copy(NIGHT).lerp(DAY, day).lerp(DUSK, dusk * 0.6);
-    sky.material.color.copy(tint);
-    clouds.material.color.copy(tint);
-    clouds.material.opacity = 0.2 + 0.35 * day;
-    clouds.material.map.offset.x += dt * 0.004;
+    const oc = dome.userData.overcast || 0;                             // rain or snow: a grey sky
+    cover.visible = !!set && oc > 0;
+    cover.material.opacity = Math.min(0.92, oc);
+    cover.material.color.setRGB(0.54, 0.57, 0.61).multiplyScalar(0.35 + 0.65 * day);
+    if (set) {
+      sky.material.color.copy(tint);
+      clouds.material.color.copy(tint);
+      clouds.material.opacity = 0.2 + 0.35 * day;
+      clouds.material.map.offset.x += dt * 0.004;
+    }
     const a = (hour - 6) / 24 * Math.PI * 2;                             // east -> overhead -> west
     sun.position.set(Math.cos(a) * 3900, Math.sin(a) * 3300 + 200, -1400);
     moon.position.set(-Math.cos(a) * 3700, -Math.sin(a) * 3100 + 200, -1700);
-    sun.visible = sun.position.y > -100;
-    moon.visible = moon.position.y > -100;
+    sun.visible = !!set && sun.position.y > -100;
+    moon.visible = !!set && moon.position.y > -100;
     const light = 0.3 + 0.7 * day;
     dome.userData.light = light;
     band.material.uniforms.c.value.setRGB(...(spec.horizon || [1, 1, 1])).multiplyScalar(light).lerp(DUSK, dusk * 0.35);

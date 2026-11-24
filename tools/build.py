@@ -101,21 +101,21 @@ def main():
     run("tools/export_spellfx.py")                       # EQ spell particle emitters (spellsnew.eff/.edd)
     run("tools/export_sfx.py")                           # EQ sound effects (snd*.pfs)
     sky = ROOT / "game" / "public" / "sky"
-    if not (sky / "sun.png").exists():
+    skies = ("normalsky", "normalcloud", "desertsky", "desertcloud", "cottonysky", "fluffycloud", "redcloud", "moon", "sun")
+    if not all((sky / f"{n}.png").exists() for n in skies):   # sky.wld's sets, and the sun and the moon
         sky.mkdir(parents=True, exist_ok=True)
         import io
         sys.path.insert(0, str(ROOT / "tools"))
         from PIL import Image
         from s3d import read_archive
         files = read_archive(need("sky.s3d"))
-        for n in ("normalsky", "normalcloud", "desertsky", "desertcloud", "redsky", "redcloud",
-                  "fearcloud", "moon", "sun"):
+        for n in skies:
             Image.open(io.BytesIO(files[f"{n}.bmp"])).convert("RGB").save(sky / f"{n}.png")
     icons = ROOT / "game" / "public" / "icons"
     icons.mkdir(parents=True, exist_ok=True)
     from PIL import Image
     spells = {"wolf": (5, 0), "fireball": (2, 15), "whirlwind": (3, 13), "snare": (4, 28),
-              "gate": (4, 13), "invis": (3, 29), "lightning": (5, 18)}   # (spells0N.tga, icon index)
+              "gate": (4, 13), "invis": (3, 29), "lightning": (5, 18), "icecomet": (2, 20)}   # (spells0N.tga, icon index)
     for name, (sheet, i) in spells.items():
         im = Image.open(need("uifiles", "default_old", f"spells0{sheet}.tga")).convert("RGB")
         im.crop(((i % 6) * 40, (i // 6) * 40, (i % 6) * 40 + 40, (i // 6) * 40 + 40)).save(icons / f"{name}.png")

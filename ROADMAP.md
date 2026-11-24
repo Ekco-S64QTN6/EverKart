@@ -60,10 +60,10 @@ These are the user's expectations. Meet them by default — the user should neve
 
 ---
 
-## 3. Current state (2026-11-22)
+## 3. Current state (2026-11-24)
 
 - **Veeshan's Peak is the reference track** — waiting for the user's play-test of the
-  2026-11-23 01:53 build. Point to point, ~10,300 units: zone-in platform in the lava cave →
+  2026-11-23 03:18 build. Point to point, ~10,300 units: zone-in platform in the lava cave →
   the octagon hall (one paved junction where the way back leaves through the north-west door)
   → down into Hoshkar's pit, a stone causeway over the lava, the roundabout round Hoshkar's
   island on its own raised deck, back out on the same road → the diamond hall (a monk training
@@ -92,6 +92,10 @@ These are the user's expectations. Meet them by default — the user should neve
   Growth 101; Oasis 110; Lavastorm 159; Everfrost 211 — mostly real terrain (a ridge, a gap
   between rocks, a ledge path) where the route itself has to change. Crushbone was dropped
   (user, 2026-11-23) for a Karana track and a Commonlands track (P3).
+- **Controls, classes and racing feel (2026-11-24):** look behind (X / Q), engine classes 50cc /
+  100cc / 150cc chosen before the racer, a second controller layout (Triggers), Start pausing on a
+  controller, spin-outs that end facing down the road, karts that trade speed only when they
+  really collide, CPU racers that go round a slower kart. Waiting for the user's drive.
 - **New: Butcherblock Mountains** (2026-11-22) — a lap of ~11,000 along the zone's own dirt
   paths: the shore below the docks, south, east to the giant dwarf statue at Kaladim's gate,
   back west along the southern path and up the central valley; its orcs, dwarves and wildlife
@@ -123,7 +127,7 @@ These are the user's expectations. Meet them by default — the user should neve
     each racer's arms solved so both hands hold it (the wheel goes to the hands); a low seat,
     legs stretched ahead in the tub; the head held as it is standing (level, looking ahead -
     hunched stances had tipped it up or down).
-- [ ] User play-test of the 2026-11-23 01:53 build; fix everything found at its source.
+- [ ] User play-test of the 2026-11-23 03:18 build; fix everything found at its source.
 - [x] **Intro cinematic** (built 2026-11-22, waiting for the user's drive) — a flyover down the
   course past its sights (Hoshkar, the statue hall, the pillow room, Phara Dar at the finish),
   then one crane move over the grid into the chase camera. Replaced the static zone shots and
@@ -244,16 +248,91 @@ Built 2026-11-22 (`game/src/frontend/`), waiting for the user's look:
 - [ ] **Oasis** — the crocodiles now fight (their attack clips were never exported); check
   the intro shows them.
 - [ ] **EQ-accurate inhabitants and off-track life, every zone** (docs/TRACK_GUIDE.md part B).
+- [x] **Greater Faydark: the bats' wings** (user, 2026-11-24: "the wings on the bats and drakes
+  are missing something") — the exporter dropped every face longer than half a model's height
+  (a guard for a few player races' bad hip bones); a bat rests with its wings spread flat (3 tall,
+  23 across), so most of its wing membranes went. Fixed at the source (`keep_faces`: half the
+  model's largest extent); no player race changes. The same rule had cut the snakes (101 of 443
+  faces), spiders, beetles, the Temple of Veeshan's dragons and Fear's DRU: all re-exported whole.
+  Bats sized to a ~9-unit wingspan (they were EverQuest's full 23 once their wings showed).
+- [ ] **Greater Faydark: the fairies' wings** — EverQuest's fairy model in the user's files
+  (`FAF`, gfaydark_chr.s3d) has no wing geometry and no wing texture at all: it is drawn as
+  EverQuest has it. Ask the user which creature they meant by "faerie drakes" (a winged model
+  from another zone, or wings added to the fairies).
+- [ ] **New track: Erud's Crossing — "Odus Crossing", the small island** (user, 2026-11-24): a sand
+  road round the edge of the island. The zone (`erudsxing`) is in the user's Project 1999
+  install (`~/Games/Project1999`), not yet in `Everquest/`: copy its files in, then the recipe
+  (docs/TRACK_GUIDE.md).
 
 ### P4 — Racing feel
-- [ ] Rubber banding tuned by play-test (now: +16% top speed far behind you, −13% far ahead).
+- [x] **Play-test 2026-11-24** (user), fixed at the source, waiting for the next drive:
+  - *Controller like other kart racers:* the layout is the classic kart racer's (A drive, B brake,
+    RB / RT drift, LB / LT / Y spell, Back rescue, Start pause); X brake was a duplicate of B and
+    is now **look behind**. Options → Controls adds a **Triggers** layout (RT drive and LT brake,
+    both pressure-sensitive; RB drift, LB / Y spell) and shows the bindings of the layout chosen.
+  - *Start did not pause:* Start opened the pause menu and, in the same frame, counted as its OK,
+    which pressed Resume. Now a menu ignores what is already held when it opens; Start again or
+    B resumes. Checked with a scripted controller: Start pauses, Start resumes, B resumes.
+  - *Stuck on the standings screen:* after a campaign race the results show one button
+    (Standings), but the screen focused the first button, which is hidden in the campaign — A,
+    Enter and Start pressed nothing. Now only the shown buttons count, and an A still held from
+    driving over the line is not a press. Checked: a held A does nothing, a fresh A goes on.
+  - *Look behind* (user): hold X (Q / C on the keyboard) — the camera cuts to in front of your
+    kart looking back down the road, and cuts back when let go. Checked in a race.
+  - *Engine classes* (user): 50cc (5% slower than before), 100cc (the game's pace until now),
+    150cc (12% faster) — top speed and acceleration of every kart, the CPU racers' cornering and
+    the spells' speeds with them. Chosen on their own screen straight after Single Race or
+    Campaign, before the racer, as kart racers do it; kept for next time; a campaign keeps its
+    class for the whole cup, and each cup has a trophy per class (100cc keeps the trophies won
+    so far).
+  - *Two karts touching slowed both* (user: two CPUs nose to tail dragged each other down and did
+    nothing about it): every frame two karts touched, both lost 2% of their speed. Now a bump
+    trades only the speed along the contact, as two equal karts would (a kart shunted from behind
+    is pushed on); touching costs nothing. CPU racers now go round a kart just ahead that they
+    are catching, on the side with room.
+  - *Spin-out left you facing the wrong way* (user: after a Flame Bolt or Lightning you had to
+    U-turn): a hit spun the kart at a fixed rate for the stun's length (~2¼ turns: anywhere).
+    Now two whole turns that settle facing down the road, so the gas is all it takes; the camera
+    holds the road's direction while the kart spins in front of it. Checked from three headings:
+    each ended facing straight down the road.
+  - *Ice Comet* (user: "find the Ice Comet particle effect and use it with another spell, add it
+    to the random list"): a new spell gem. A comet of ice falls out of the sky onto the racer just
+    ahead of you (the leader's falls on the racer behind) and spins them out; Invisibility lets
+    it pass through. EverQuest's own Ice Comet effect (spell 732, effect 82: its cold swirl falls
+    with the comet, its frost burst where it lands), its gem icon, and EverQuest's ice-crack sound.
+    Mostly given to racers in the middle and at the back. Checked in a race: the racer ahead spun
+    out as it landed.
+- [ ] Rubber banding tuned by play-test (now: up to +30% top speed far behind you, easing off
+  ahead).
 - [ ] CPU racers on shared two-lane roads and crossings (VP) — keep to their lane.
-- [ ] Physical controller test; options menu.
+- [ ] Rebinding keys and buttons (Options → Controls shows them; they cannot be changed yet).
 
 ### P5 — Stability
 - [ ] **Hard lock / crash** reported by the user — play the new build, send the newest log
   (`~/.config/EverKart/logs/`). The zone's road-shaping now keeps ~2.4x fewer triangles,
   which may have been part of it.
+
+### P7 — Multiplayer (user, 2026-11-24): split screen and online
+The design: **docs/MULTIPLAYER.md** (what each needs, measured costs, the netcode, the order).
+- [ ] **Groundwork:** seats instead of one `player`; a race started and ended without reloading
+  the page; a fixed 60-step simulation; one random seed per race.
+- [ ] **Split screen, two players**, end to end (join, class, two racer panels, track, race,
+  results); then **three and four** (quarters; the course map in the fourth with three).
+- [ ] **Split-screen performance:** creatures are two thirds of a frame's draw calls (measured:
+  North Karana ~1,950 a view, ~1,350 of them creatures; the zone ~70) - merge each creature's
+  pieces at export, skip creatures past the fog per view, fog and far clip in with three or four
+  views; target 60 fps with four views on the user's machine.
+- [ ] **Online core:** WebRTC between the players' machines, the host's machine in charge of the
+  shared race (CPU racers, spell gems, targeted spells, the finish order), each player's own kart
+  simulated on their own machine; a small lobby service (room codes, the lobby list, connection
+  setup; no game data); LAN races without it.
+- [ ] **Online racing complete:** spells and hits, finish order, players dropping, the track
+  fingerprint check (each player builds from their own EverQuest files: only tracks everyone has
+  identically can be raced; no EverQuest data is ever sent between players).
+- [ ] **Online polish:** public lobby browser, LAN discovery, online cups, split-screen players
+  online.
+- [ ] **Decision for the user:** where the public lobby service runs (a small hosted server or a
+  hosting service's free tier). LAN and direct-address races need none.
 
 ### P6 — Later
 - [ ] Ambient: zone emitters (`<zone>.emt`, `EnvEmitterEffects/`), zone sound effects.
@@ -263,6 +342,37 @@ Built 2026-11-22 (`game/src/frontend/`), waiting for the user's look:
 ---
 
 ## 5. Feedback log (what the user said, and what was done)
+
+### 2026-11-24 — multiplayer; controller, look behind, classes; bumps, spin-outs; bats; a new track
+- "Add to the roadmap and explore how to handle multiplayer: local up to 4 players each with a
+  quarter of the screen like Mario Kart 64, and online multiplayer with lobby hosting and some
+  netcode, P2P or server-side, whatever we have to do" → explored and written up:
+  docs/MULTIPLAYER.md, P7. Split screen: one renderer drawing each player's view in its quarter;
+  measured that creatures, not the zone, are what four views would multiply. Online: peer to
+  peer around the host (a game server would need EverQuest data, which the project never hosts),
+  WebRTC, a small lobby service; each machine drives its own kart with no input delay. One
+  decision for the user: where the lobby service runs.
+- "We need a look behind button so you can see the other racers behind you" → done (X / Q).
+- "The wings on the bats and drakes in Greater Faydark are missing something, the model isn't
+  done right, faerie drakes" → the bats: an exporter rule cut their wings (and parts of snakes,
+  spiders, beetles, dragons on other tracks); fixed at the source. The fairies have no wings in
+  EverQuest's own model: asked which creature was meant.
+- "Check the gamepad controls, not sure it's set up like other karting games; I can't proceed past
+  the standings screen by pressing anything; Start doesn't pause" → all three fixed (P4).
+- "AI racer problem: when two karts are touching it slows both down - two NPCs connected nose to
+  tail slowing each other and not minding" → bumps trade speed only on a real collision; CPU
+  racers pass (P4).
+- "We need CC speed classes: the current speed the middle one, one 5% slower, one 10-15% faster;
+  pick it at the campaign or single race select, where it belongs as in Mario Kart" → 50cc /
+  100cc / 150cc (+12%), its own screen after choosing the mode (P4).
+- "Another track: Odus Crossing, the small island; the course sand going around the edge of the
+  zone geometry" → P3 (Erud's Crossing, from the user's Project 1999 files).
+- "When a spell like Lightning or Flame Bolt hits you, the spin ends with you facing the wrong
+  way; you should end up facing the right way so you can just gas it" → done (P4).
+- "Look for the Ice Comet particle effect and use it with another spell to add to the random list"
+  → Ice Comet, a new spell gem: falls on the racer ahead (P4).
+- "Build the AppImage so I can test all the new things, and commit and push everything to GitHub"
+  → done.
 
 ### 2026-11-23 — play-test: narrow spots, item boxes, Everfrost's grid, skies, weather
 - "Some tracks are still too narrow in spots - check Everfrost, Nektulos Forest, Oasis; the track
@@ -275,15 +385,38 @@ Built 2026-11-22 (`game/src/frontend/`), waiting for the user's look:
   line smoothed onto a slope. Everfrost's narrowest spots went from ~4 across to 14-19, Oasis's
   dune neck from 4 to full width, Nektulos 815 from 10 to ~20. Left: Nektulos ~521 runs through
   a structure (route change).
-- "The power-up squares are sometimes under the track or too high above it" → open.
-- "Everfrost starts some racers off the track" → open.
-- "The sky is still wrong in some zones" → open.
-- "Add rain to randomly happen, and other weather effects from the game" → open.
+- "The power-up squares are sometimes under the track or too high above it" → fixed: each box
+  sits on the road's own surface where it stands (the road query), spread across the road's real
+  width on each side; its bob no longer drifts.
+- "Everfrost starts some racers off the track" → fixed for every track: each grid slot is kept
+  inside the road as built at its point.
+- "The sky is still wrong in some zones" → fixed from EverQuest's own sky.wld: each zone shows
+  the sky its header names (sky 0 - Faydark, Everfrost, Nektulos, Growth - is no dome: the fog
+  colour is the sky, as in EverQuest; Lavastorm's invented red sky is gone: its header gives the
+  normal sky), each texture projected flat across a shallow dome at EverQuest's tiling (it was
+  wrapped round a sphere 6-8 times: small repeating clouds, streaks at the horizon).
+- "Add rain to randomly happen, and other weather effects from the game" → done: rain (streaks,
+  EverQuest's splash rings, a grey overcast, the fog closing in, lightning and thunder in a storm)
+  in Faydark, Nektulos, Unrest, Butcherblock, the Karanas, the Commonlands and Growth; snow
+  (EverQuest's snowflake) in Everfrost; rolled at random each race (Options → Racing → Weather:
+  changing, always, clear skies).
 - "Creatures that roam onto the track clip under the road; they should be on top of it if they
   are on the track at all - which I don't think they should be, and they are in many tracks" →
-  open: nothing should roam onto the road.
-- "The stuff going on off track is still way too generic, boring and repetitive" → open.
-- "The creatures need to be equipped better: more armor, different weapons, etc." → open.
+  fixed: every creature, fight and crowd is placed past the road's real edge (its own width each
+  side, kerbs and walls) and patrols turn back at it; checked on nine tracks: none on the road at
+  the start or after 20 s of racing (Phara Dar at Veeshan's Peak's finish stands at the road's
+  end by design).
+- "The stuff going on off track is still way too generic, boring and repetitive" → first pass:
+  the roadside fights are now matchups against the zone's own creatures (Faydark: orcs, wolves,
+  bats ...; one on one, two adventurers on one, one against two), at most 16 a track instead of
+  up to 40 copies of one fight; walkers keep their own beat along the road (15-60 units, not all
+  pacing 9). Still to do: each zone's own scenes (camps, merchants, travellers, its landmarks).
+- "The creatures need to be equipped better: more armor, different weapons, etc." → done for
+  the adventurers: ~90 of EverQuest's held items (gequip.s3d, sorted by their textures into
+  one-handers, two-handers, staves and shields), each fighter armed at random for a style its
+  race favours; every fighter race also in leather, chain and plate (two sets per race on each
+  track, besides the track's own). The troll adventurers of the Commonlands were missing (no
+  model was exported): added.
 - "About 20% of the weekly quota left: make getting the repo up on GitHub the priority, plus the
   fixes in progress" → the repository published (github.com/Ekco-S64QTN6/EverKart) with the
   road-width fixes; the rest of this list is next.

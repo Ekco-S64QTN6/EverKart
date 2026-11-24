@@ -1,6 +1,6 @@
 // The racers and tracks lists, and the race's results screen (the menus are src/frontend/);
 // keyboard, mouse and controller all work.
-import { readMenu } from './input.js';
+import { readMenu, primeMenu } from './input.js';
 
 // racers come from drivers/index.json (tools/export_drivers.py): every classic race,
 // both genders, each with the armor materials it has
@@ -41,10 +41,13 @@ export function showResults(rows, actions) {
   const table = document.getElementById('standings');
   table.innerHTML = rows.map((r, i) => `<tr class="${r.you ? 'you' : ''}"><td>${i + 1}</td><td>${r.name}</td><td>${r.race}</td><td>${r.time}</td></tr>`).join('');
   el.hidden = false;
-  const buttons = [...el.querySelectorAll('button')];
-  buttons.forEach((b) => { b.onclick = () => actions[b.dataset.act](); });
+  el.querySelectorAll('button').forEach((b) => { b.onclick = () => actions[b.dataset.act](); });
+  // only the buttons shown (a campaign race has just one, to its standings): a hidden button can
+  // take no focus, and A / Enter would press nothing
+  const buttons = [...el.querySelectorAll('button')].filter((b) => !b.hidden);
   let sel = 0;
   buttons[0].focus();
+  primeMenu();                                   // A still held from driving is not a press here
   (function loop() {
     if (el.hidden) return;
     const m = readMenu();

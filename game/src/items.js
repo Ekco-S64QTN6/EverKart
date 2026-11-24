@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { LOOKS } from './particles.js';
 import { kartAnchor, pointAnchor } from './eqfx.js';
+import { TUNING } from './kart.js';
 
 export const SPELLS = {
   wolf: { name: 'Spirit of Wolf', icon: 'wolf' },              // speed burst
@@ -14,6 +15,7 @@ export const SPELLS = {
   gate: { name: 'Gate', icon: 'gate' },                        // jump forward along the line
   invis: { name: 'Invisibility', icon: 'invis' },              // spells pass through you
   lightning: { name: 'Shock of Lightning', icon: 'lightning' }, // strikes the race leader
+  icecomet: { name: 'Ice Comet', icon: 'icecomet' },           // falls out of the sky on the racer ahead
 };
 
 // Making each spell readable: a glowing core on what flies, a marker on what lingers (the
@@ -60,7 +62,7 @@ function swirlTex() {
 // weights by race position bucket: [leaders, middle, back]
 const TABLE = {
   wolf: [2, 4, 5], fireball: [5, 4, 2], whirlwind: [5, 3, 1], snare: [1, 3, 3],
-  gate: [0, 2, 4], invis: [3, 2, 1], lightning: [0, 1, 3],
+  gate: [0, 2, 4], invis: [3, 2, 1], lightning: [0, 1, 3], icecomet: [1, 3, 3],
 };
 
 function roll(place, count) {
@@ -72,7 +74,7 @@ function roll(place, count) {
 }
 
 export class ItemSystem {
-  constructor(scene, track, karts, raceOrder, fx, eqfx) {
+  constructor(scene, track, karts, raceOrder, fx, eqfx, roadAt = null) {
     this.scene = scene;
     this.fx = fx;                        // EQ-sprite cosmetics (gems, drift sparks)
     this.eq = eqfx;                      // EverQuest spell effects
@@ -82,6 +84,7 @@ export class ItemSystem {
     this.boxes = [];
     this.shots = [];                     // flame bolts in flight
     this.traps = [];                     // whirls
+    this.comets = [];                    // ice comets falling
     const gem = new THREE.OctahedronGeometry(1.6, 0);
     const gemMat = new THREE.MeshBasicMaterial({ color: 0xff3355, transparent: true, opacity: 0.9 });
     const haloMat = new THREE.MeshBasicMaterial({ color: 0xffaacc, transparent: true, opacity: 0.25, depthWrite: false });
@@ -89,13 +92,17 @@ export class ItemSystem {
       const i = track.open ? Math.floor(track.start + frac * (track.finish - track.start)) : Math.floor(frac * track.n);
       const tan = track.tangent(i);
       const side = new THREE.Vector3(-tan.z, 0, tan.x);
-      for (const lane of [-0.55, -0.18, 0.18, 0.55]) {
+      // across the road as it is built here (its own width each side), each box on the road's
+      // surface where it stands (the road is not level with the racing line everywhere)
+      const wl = track.roadWL?.[i] ?? track.width, wr = track.roadWR?.[i] ?? track.width;
+      for (const d of [-0.6 * wl, -0.2 * wl, 0.2 * wr, 0.6 * wr]) {
         const g = new THREE.Group();
         g.add(new THREE.Mesh(gem, gemMat));
         g.add(new THREE.Mesh(new THREE.SphereGeometry(2.4, 12, 8), haloMat));
-        g.position.copy(track.path[i]).addScaledVector(side, lane * track.width).add(new THREE.Vector3(0, 3.2, 0));
+        g.position.copy(track.path[i]).addScaledVector(side, d);
+        g.position.y = (roadAt?.(g.position.x, track.path[i].y, g.position.z) ?? track.path[i].y) + 3.2;
         scene.add(g);
-        this.boxes.push({ mesh: g, respawn: 0 });
+        this.boxes.push({ mesh: g, respawn: 0, y: g.position.y });
       }
     }
     for (const k of karts) {
@@ -140,9 +147,14 @@ export class ItemSystem {
     k.itemTimer = 0.6 + Math.random() * 2.5;         // CPU reaction time
   }
 
+  // a spin-out: two whole turns that settle facing down the road (preUpdate), so when it wears off
+  // the gas is all it takes - never a U-turn
   hit(k, spin = 1.3) {
     if (k.invis > 0 || k.spin > 0) return false;
-    k.spin = spin;
+    k.spin = k.spinDur = spin;
+    k.spinFrom = k.yaw;
+    k.drifting = false;
+    k.charge = 0;
     k.speed *= 0.3;
     return true;
   }
@@ -160,7 +172,7 @@ export class ItemSystem {
     this.cast(kind, k);
     this.sound('cast', k, { vol: 0.75, dur: 1.1 });          // the first moment of EQ's casting chant
     if (me) this.say(`You cast <b>${SPELLS[kind].name}</b>`, true);
-    if (kind === 'wolf') { k.boost = 2.6; k.speed = Math.max(k.speed, 70); this.land(kind, k, 2.6); this.sound('wolf', k, { vol: 0.8 }); }
+    if (kind === 'wolf') { k.boost = 2.6; k.speed = Math.max(k.speed, 70 * TUNING.speedClass); this.land(kind, k, 2.6); this.sound('wolf', k, { vol: 0.8 }); }
     else if (kind === 'invis') { k.invis = 5; this.land(kind, k, 2.5); this.sound('invis', k, { vol: 0.7 }); }
     else if (kind === 'gate') {
       this.sound('gate', k);
@@ -168,7 +180,7 @@ export class ItemSystem {
       const i = t.idx(k.progress + 22);
       const p = t.path[i], tan = t.tangent(i);
       k.place([p.x, p.y + 2, p.z], Math.atan2(tan.x, -tan.z));
-      k.speed = 40;
+      k.speed = 40 * TUNING.speedClass;
       if (i < k.progress && !t.open) k.lap += 1;
       k.progress = i;
       this.land(kind, k, 2.0);
@@ -201,6 +213,33 @@ export class ItemSystem {
       shot.hist = [];
       for (const sp of [shot.core, ...shot.tail]) { sp.position.copy(shot.pos); this.scene.add(sp); }
       this.shots.push(shot);
+    } else if (kind === 'icecomet') {
+      // a comet of ice falls out of the sky onto the racer just ahead (the leader's falls on the
+      // racer behind): it follows them down and lands in about a second - steering cannot dodge
+      // it, Invisibility can
+      const order = this.raceOrder(), idx = order.indexOf(k);
+      const target = idx > 0 ? order[idx - 1] : order[1];
+      if (target) {
+        const c = { target, owner: k, t: 0, fall: 1.1, dir: new THREE.Vector3(0, -1, 0), hist: [] };
+        c.pos = this.cometAt(c, 0);
+        c.anchor = pointAnchor(() => c.pos, () => c.dir);
+        c.trail = this.eq.play(kind, 0, c.anchor, c.fall + 0.2);      // EverQuest's cold swirl, falling with it
+        // a solid ball of ice in a glow, with a tail: it reads against a bright sky and at night
+        c.core = new THREE.Group();
+        c.core.add(new THREE.Mesh(new THREE.IcosahedronGeometry(1.7, 1), new THREE.MeshBasicMaterial({ color: 0xe6f7ff })));
+        c.core.add(new THREE.Mesh(new THREE.IcosahedronGeometry(2.6, 1), new THREE.MeshBasicMaterial({ color: 0x4f9dff, transparent: true, opacity: 0.45, depthWrite: false })));
+        c.core.add(sprite('#9fd8ff', 11, 0.9));
+        c.tail = [0.8, 0.62, 0.46, 0.32].map((f) => {
+          const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow('#3f8cff'), transparent: true, depthWrite: false, opacity: 0.75 * f }));
+          sp.scale.setScalar(6 * f);
+          return sp;
+        });
+        for (const sp of [c.core, ...c.tail]) { sp.position.copy(c.pos); this.scene.add(sp); }
+        c.hum = this.sfx?.play('travel', { at: () => c.pos, loop: true, vol: 0.8 });
+        this.comets.push(c);
+        const them = target === this.karts[0];
+        if (them) this.say(`${this.whose(k)} <b>Ice Comet</b> is falling on you`, true);
+      }
     } else if (kind === 'whirlwind') {
       const pos = k.pos.clone().addScaledVector(k.forward(), -7).add(new THREE.Vector3(0, 0.5, 0));
       const trap = { pos, owner: k, life: 30, armed: 0.5, pulse: 0 };
@@ -256,6 +295,14 @@ export class ItemSystem {
     });
   }
 
+  // where a falling comet is: out of the sky ahead of its target, down onto it, faster as it
+  // falls (it is in view for the whole fall); it moves with the target all the way
+  cometAt(c, u) {
+    const to = c.target.pos.clone().add(new THREE.Vector3(0, 2.5, 0));
+    const from = to.clone().addScaledVector(c.target.forward(), 30).add(new THREE.Vector3(0, 48, 0));
+    return from.lerp(to, u * u);
+  }
+
   // a CPU racer's moment for its spell: a bolt when someone is just ahead, a whirl when
   // someone is right behind, the wolf on a straight; the rest whenever
   wise(k) {
@@ -265,6 +312,7 @@ export class ItemSystem {
     if (k.item === 'fireball') return others.some((o) => gap(o) > 2 && gap(o) < 30);
     if (k.item === 'whirlwind') return others.some((o) => gap(o) < -1 && gap(o) > -12);
     if (k.item === 'wolf') return this.track.bend[this.track.idx(k.progress + 6)] < 0.15;
+    if (k.item === 'icecomet') return this.raceOrder().indexOf(k) > 0;   // someone ahead to drop it on
     return true;
   }
 
@@ -273,11 +321,19 @@ export class ItemSystem {
     for (const k of this.karts) {
       k.boost = Math.max(0, k.boost - dt);
       k.slow = Math.max(0, k.slow - dt);
+      const spinning = k.spin > 0;
       k.spin = Math.max(0, k.spin - dt);
       k.invis = Math.max(0, k.invis - dt);
       k.effectScale = (k.boost > 0 ? 1.3 : 1) * (k.slow > 0 ? 0.6 : 1);
       if (k.boost > 0) k.input.throttle = 1;
-      if (k.spin > 0) { k.input.throttle = 0; k.input.steer = 0; k.yaw += 11 * dt; }
+      if (spinning) {
+        k.input.throttle = 0; k.input.steer = 0;
+        const tan = this.track.tangent(k.progress);
+        k.spinHead = Math.atan2(tan.x, -tan.z);                        // the way down the road
+        const rest = Math.atan2(Math.sin(k.spinHead - k.spinFrom), Math.cos(k.spinHead - k.spinFrom));
+        const u = 1 - k.spin / k.spinDur, e = 1 - (1 - u) * (1 - u);    // fast at first, settling
+        k.yaw = k.spin > 0 ? k.spinFrom + (4 * Math.PI + rest) * e : k.spinFrom + rest;
+      }
       if (k.item && isCpu(k) && (k.itemTimer -= dt) <= 0 && (this.wise(k) || k.itemTimer < -6)) this.use(k);
       k.mesh.traverse((o) => {
         if (!o.material) return;
@@ -294,7 +350,7 @@ export class ItemSystem {
     for (const b of this.boxes) {
       b.mesh.rotation.y += dt * 1.8;
       if (b.mesh.visible && Math.random() < dt * 4) LOOKS.gemSparkle(this.fx, b.mesh.position);
-      b.mesh.position.y += Math.sin(performance.now() / 300 + b.mesh.position.x) * 0.01;
+      b.mesh.position.y = b.y + Math.sin(performance.now() / 300 + b.mesh.position.x) * 0.3;   // a gentle bob round its place
       if (b.respawn > 0) { b.respawn -= dt; b.mesh.visible = b.respawn <= 0; continue; }
       for (const k of this.karts) {
         if (k.pos.distanceToSquared(b.mesh.position) < 30 && !k.item) {
@@ -309,7 +365,7 @@ export class ItemSystem {
     const t = this.track;
     for (const s of this.shots) {
       s.life -= dt;
-      s.along += dt * 25;                         // path points per second (~150 units/s)
+      s.along += dt * 25 * TUNING.speedClass;     // path points per second (~150 units/s at 100cc: faster than any kart)
       const i = t.idx(Math.floor(s.along));
       const target = t.path[i].clone().add(new THREE.Vector3(0, 3, 0));
       s.dir = target.clone().sub(s.pos).setY(0).normalize();
@@ -333,6 +389,31 @@ export class ItemSystem {
       }
       if (s.life <= 0) { s.trail.stop(); s.hum?.stop(); for (const sp of [s.core, ...s.tail]) this.scene.remove(sp); }
     }
+    for (const c of this.comets) {
+      c.t += dt;
+      const u = Math.min(1, c.t / c.fall);
+      const p = this.cometAt(c, u);
+      if (p.distanceToSquared(c.pos) > 1e-6) c.dir.copy(p).sub(c.pos).normalize();
+      c.pos.copy(p);
+      c.hist.unshift(c.pos.clone());
+      if (c.hist.length > 9) c.hist.pop();
+      c.core.position.copy(c.pos);
+      c.core.rotation.x += dt * 5; c.core.rotation.y += dt * 3;
+      c.tail.forEach((sp, j) => sp.position.copy(c.hist[Math.min(c.hist.length - 1, (j + 1) * 2)]));
+      if (u < 1) continue;
+      c.done = true;
+      c.trail.stop(); c.hum?.stop();
+      for (const sp of [c.core, ...c.tail]) this.scene.remove(sp);
+      const k = c.target, them = k === this.karts[0];
+      this.flash(c.pos.clone(), '#bfe8ff', 20, 0.55);
+      this.sound('ice', k);
+      if (this.hit(k)) {
+        this.land('icecomet', k, 1.8);                              // EverQuest's impact: the frost burst
+        this.sound('hit', k, { vol: 0.5 });
+        this.say(`${this.whose(c.owner)} <b>Ice Comet</b> hit ${them ? 'you' : k.name}`, c.owner === this.karts[0] || them);
+      } else this.say(`${this.whose(c.owner)} <b>Ice Comet</b> passed through ${them ? 'you' : k.name}`, c.owner === this.karts[0] || them);
+    }
+    this.comets = this.comets.filter((c) => !c.done);
     for (const w of this.traps) {
       w.life -= dt;
       w.armed -= dt;

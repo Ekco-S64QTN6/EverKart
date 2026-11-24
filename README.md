@@ -39,6 +39,9 @@
   Growth and Mischief, and more. Each is a real
   kart track laid through the real zone: a smooth road in the zone's own stone, with kerbs and
   walls along its edges.
+- **EverQuest's skies and weather.** Each zone shows its own sky from the game's files, through
+  a day and a night; rain sweeps the Karanas and Faydwer and snow falls on Everfrost, with
+  lightning and thunder in a storm.
 - **The zone is alive.** Named NPCs stand at their real spawn points, and dragons breathe fire
   at passing karts. An 18-strong raid takes on Silverwing in Veeshan's Peak, and a monk trains
   racnar down a hallway.
@@ -47,7 +50,7 @@
   turning showroom of the real racers.
 - **A campaign.** Four cups across Norrath with points, standings and a podium, and gold,
   silver and bronze trophies to win.
-- **Spells as items.** Spirit of Wolf, Flame Bolt, Snare, Gate, Invisibility and more, each with
+- **Spells as items.** Spirit of Wolf, Flame Bolt, Ice Comet, Snare, Gate, Invisibility and more, each with
   its own particle effect from EverQuest.
 - **Kart racing done right.** Drifting with mini-turbos, rubber banding, CPU rivals, a course
   flyover before every race, and full controller support.
@@ -113,11 +116,15 @@ toggles a window.
 |---|---|---|
 | Steer | ← → / A D | Left stick, D-pad |
 | Accelerate | ↑ / W | A |
-| Brake / reverse | ↓ / S | B (or X) |
+| Brake / reverse | ↓ / S | B |
 | Drift (hop, then release for a mini-turbo) | Space | RB / RT |
 | Cast your spell | E / Shift | LB / LT / Y |
-| Back on the track | R | Back / Select |
-| Pause | Esc / P | Start |
+| Look behind (hold) | Q / C | X |
+| Back on the track | R | Back / View |
+| Pause | Esc / P | Start / Menu |
+
+Options → Controls has a second controller layout, **Triggers**: RT accelerates and LT brakes
+(both pressure-sensitive), RB drifts, LB or Y casts.
 
 **Drifting:** hold drift while turning at speed. Steering into the turn charges it faster.
 The sparks go white, then blue (small turbo), then orange (big turbo); let go to boost.
@@ -162,7 +169,8 @@ route over the zone's real floor and lays a kart track along it. It poses EverQu
 models in their own animations, and packages everything into a desktop app.
 
 How every piece is made is described in **[docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md)**, and
-how to turn a zone into a track in **[docs/TRACK_GUIDE.md](docs/TRACK_GUIDE.md)**.
+how to turn a zone into a track in **[docs/TRACK_GUIDE.md](docs/TRACK_GUIDE.md)**. The plan for
+split-screen and online multiplayer is **[docs/MULTIPLAYER.md](docs/MULTIPLAYER.md)**.
 
 ## 📂 Project layout
 

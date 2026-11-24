@@ -1,5 +1,6 @@
 // Racing line, lap/progress tracking, CPU driving.
 import * as THREE from 'three';
+import { TUNING } from './kart.js';
 
 export class Track {
   constructor(data) {
@@ -158,7 +159,30 @@ export class Driver {
     const wR = t.roadWR?.[i] ?? t.width, wL = t.roadWL?.[i] ?? t.width, mid = (wR - wL) / 2, hw = (wR + wL) / 2;
     let want0 = mid + this.lane * Math.min(hw, t.width) * 0.3 * (1 - bendK) + inside * hw * 0.45 * bendK;
     if (t.sharedSet?.has(i)) want0 = mid + hw * 0.45;               // a road taken both ways: keep right
-    const lane = t.roomL ? THREE.MathUtils.clamp(want0, -Math.max(0, t.roomL[i] - 8), Math.max(0, t.roomR[i] - 8)) : want0;
+    const lo = t.roomL ? -Math.max(0, t.roomL[i] - 8) : -hw, hi = t.roomR ? Math.max(0, t.roomR[i] - 8) : hw;
+    let lane = THREE.MathUtils.clamp(want0, lo, hi);
+    // a kart just ahead on this line, and this one is on it or closing: go round it, on the side
+    // with the room (the nearer side when both have it) - not ride its tail; eased in and out
+    let pass = null;
+    if (this.field) {
+      const f = k.forward();
+      let best = Infinity;
+      for (const o of this.field) {
+        if (o === k || Math.abs(o.pos.y - k.pos.y) > 5) continue;
+        const dx = o.pos.x - k.pos.x, dz = o.pos.z - k.pos.z;
+        const fwd = dx * f.x + dz * f.z, lat = dx * f.z * -1 + dz * f.x;   // ahead of this kart; to its right
+        if (fwd < 2 || fwd > 24 || Math.abs(lat) > 6.5 || fwd > best) continue;
+        if (fwd > 9 && k.speed - o.speed < 3) continue;                      // not catching it
+        best = fwd;
+        const oLane = o.pos.clone().sub(t.path[i]).dot(side);               // its place across the road
+        const right = oLane + 7.5, left = oLane - 7.5;
+        const okR = right <= hi, okL = left >= lo;
+        pass = okR && okL ? (Math.abs(right - lane) < Math.abs(left - lane) ? right : left) : okR ? right : okL ? left : null;
+      }
+    }
+    this.passW = (this.passW ?? 0) + ((pass !== null ? 1 : 0) - (this.passW ?? 0)) * Math.min(1, dt * (pass !== null ? 3 : 1.2));
+    if (pass !== null) this.passLane = pass;
+    if (this.passLane !== undefined) lane = THREE.MathUtils.clamp(lane + (this.passLane - lane) * this.passW, lo, hi);
     const target = t.path[i].clone().addScaledVector(side, lane);
     const to = target.sub(k.pos).setY(0);
     const want = Math.atan2(to.x, -to.z);
@@ -170,7 +194,7 @@ export class Driver {
     const look = Math.round(4 + Math.max(0, k.speed) / 6);
     for (let j = 1; j <= look; j += 2) bend = Math.max(bend, t.bend[t.idx(k.progress + j)]);
     // (a racer catching up carries more speed through the bends too: rubber banding below)
-    const corner = (82 - 30 * Math.min(1, bend / 0.9)) * (1 + Math.max(0, (this.band ?? 1) - 1) * 0.85);   // ~52 units/s for a right angle
+    const corner = (82 - 30 * Math.min(1, bend / 0.9)) * (1 + Math.max(0, (this.band ?? 1) - 1) * 0.85) * TUNING.speedClass;   // ~52 units/s for a right angle (100cc)
     k.input.throttle = k.speed > corner ? (k.speed > corner + 8 ? -0.6 : 0) : 1;
     // drift a sustained bend with room either side; let go as it straightens (the mini-turbo)
     if (this.drifter) {
