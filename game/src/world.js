@@ -56,7 +56,7 @@ export const ZONE_LOOK = {
   'veeshan.glb': { ambient: 0.36, gain: 1.6 },
   'butcher.glb': { ambient: 0.45, gain: 1.4, open: true, hour: 10 },
   'northkarana.glb': { ambient: 0.45, gain: 1.4, open: true, hour: 12 },
-  'erudsxing.glb': { ambient: 0.42, gain: 1.4, open: true, hour: 18.25, lockHour: true },   // fixed late dusk over the island and sea
+  'erudsxing.glb': { ambient: 0.42, gain: 1.4, open: true, hour: 18.5, lockHour: true },   // fixed late dusk over the island and sea
   'ecommons.glb': { ambient: 0.45, gain: 1.4, open: true, hour: 14 },
 };
 const FOG_MIN = 260;        // the fog's far edge at least this far: a kart covers 200 units in under 3 s

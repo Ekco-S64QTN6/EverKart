@@ -272,8 +272,12 @@ Built 2026-11-22 (`game/src/frontend/`), waiting for the user's look:
   smoothly around the Kerran island with the open ocean visible on the right. Remove the
   seaward barrier while retaining the landward wall; replace the current kinked corners with
   flowing racing arcs, keep a few deliberate e-brake turns, and lock the zone to a starry dusk.
-  The course is in the game; the revised shoreline waypoints still need to be laid against the
-  local floorplan and object footprints before the PR is ready to test.
+  - [x] Initial source pass: let the planner consider beach floors down to z -55 and favour a
+    lower -28 contour; increase corner radius to 82; use the zone's islandrock.bmp for the
+    landward wall, leave the seaward edge open, and lock the sky at late dusk (18.5).
+  - [ ] Re-export against the local zone mesh, inspect the new route and road shots, then adjust
+    waypoints to the exact shoreline and play-test the AppImage. The current waypoint loop is
+    retained pending that geometry check.
 
 ### P4 — Racing feel
 - [x] **Play-test 2026-11-24** (user), fixed at the source, waiting for the next drive:
@@ -378,6 +382,14 @@ The design: **docs/MULTIPLAYER.md** (what each needs, measured costs, the netcod
   100cc / 150cc (+12%), its own screen after choosing the mode (P4).
 - "Another track: Odus Crossing, the small island; the course sand going around the edge of the
   zone geometry" → P3 (Erud's Crossing, from the user's Project 1999 files).
+- "I played it: move lower down by the shoreline, keep the ocean on the right, remove the walls
+  boxing in both sides, smooth the corners, and use the dusk starry sky" → Erud's Crossing
+  shoreline/dusk pass (P3): lower beach contour, open seaward edge, landward island-rock wall,
+  larger corner radius and fixed late dusk. Geometry export and play-test remain.
+- "After that, review every track for balance and rough spots; long straights are boring, use
+  flowing F1-style bends with a few e-brake-hop corners. Plane of Hate needs the major overhaul:
+  retain its speed, reveal the church and broad halls, avoid tight city streets" → P3 full-track
+  handling review, with Plane of Hate first.
 - "When a spell like Lightning or Flame Bolt hits you, the spin ends with you facing the wrong
   way; you should end up facing the right way so you can just gas it" → done (P4).
 - "Look for the Ice Comet particle effect and use it with another spell to add to the random list"
