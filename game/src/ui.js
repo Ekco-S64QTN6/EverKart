@@ -35,6 +35,7 @@ export const TRACKS = [
   { id: 'butcher', name: 'Butcherblock Mountains', sub: 'From the docks to the gates of Kaladim' },
   { id: 'northkarana', name: 'North Karana', sub: 'Across the plains to the druid circle' },
   { id: 'ecommons', name: 'East Commonlands', sub: 'The road from the gates of Freeport' },
+  { id: 'erudsxing', name: "Erud's Crossing", sub: 'Round the Kerran isle, on the sand' },
 ];
 export function showResults(rows, actions) {
   const el = document.getElementById('results');

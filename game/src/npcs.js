@@ -200,10 +200,11 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
       const base = Math.floor(((slot + 0.5) / total) * track.n);
       for (let tryI = 0; tryI < 40; tryI++) {
         const i = (base + tryI * 7) % track.n;
-        const b = beside(i, 3.5 + radius + Math.random() * 5, radius, spec.height);
+        const hover = spec.hover || 0;                 // a flyer (fae drake, bat) floats this far up, bobbing
+        const b = beside(i, 3.5 + radius + Math.random() * 5, radius, spec.height + hover);
         if (!b) continue;
-        const s = spawn(looks[c % looks.length], spec.height, b.spot, faceYaw(b.out.clone().negate()) + (Math.random() - 0.5) * 0.5,
-          { model: spec.model, index: i, breath: spec.breath, cool: 2 + Math.random() * 3 });
+        const s = spawn(looks[c % looks.length], spec.height, b.spot.clone().add(new THREE.Vector3(0, hover, 0)), faceYaw(b.out.clone().negate()) + (Math.random() - 0.5) * 0.5,
+          { model: spec.model, index: i, breath: spec.breath, cool: 2 + Math.random() * 3, hover, gy: b.spot.y, bob: Math.random() * 6.3 });
         if (spec.feature && !feature) feature = { pos: b.spot.clone(), height: spec.height, lookH: spec.height * 0.7, actor: s };
         if (s.walk && (spec.height <= 10 || spec.wander)) {      // patrol along the road edge
           const reach = spec.wander ? 45 : 15 + Math.random() * 45;   // each its own beat, some a long walk
@@ -344,6 +345,8 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
     return offRoad ? null : c.clone();
   };
   for (const v of data.vignettes || []) {
+    if (v.kind === 'wade') { await placeWaders(v); continue; }
+    if (v.kind === 'ship') { await placeShip(v); continue; }
     if (v.kind === 'named') {                          // a named NPC from the scenes, by name
       const nm = named.find((q) => q.name === v.name);
       if (nm) shots.push({ pos: nm.pos.clone(), height: nm.height, lookH: nm.height * 0.6, radius: 0, actor: nm.actor, title: v.title });
@@ -512,6 +515,95 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
   }
   if (!shots.length && feature) shots.push({ pos: feature.pos.clone(), height: feature.height, radius: 0, actor: feature.actor });
 
+  // { kind: 'wade', title, models, count, height, water, depth, swim }: the zone's people standing in
+  // the sea beside the course, `depth` of them under the water (0.5: waist deep), watching the race
+  // - each turns to the karts going by; `swim` of them wade slowly along the shore
+  async function placeWaders(v) {
+    const looks = (await Promise.all(v.models.map((m) => loadModel(fileOf(m))))).filter(Boolean);
+    if (!looks.length) return;
+    const H = v.height || 6, sink = H * (v.depth ?? 0.5), water = v.water;
+    let first = null;
+    const group = v.group || 3;                          // a few together at each spot, watching
+    for (let k = 0; k < (v.count || 10); k++) {
+      const base = Math.floor(((Math.floor(k / group) + 0.5) / Math.ceil(v.count / group)) * track.n) + (k % group) * 2;
+      for (let tryI = 0; tryI < 12; tryI++) {
+        const i = (base + tryI * 5) % track.n, p = track.path[i], tan = track.tangent(i), side = new THREE.Vector3(-tan.z, 0, tan.x);
+        let at = null;
+        // the sea side, out past the road's edge to where the water is deep enough and where a
+        // racer sees them from the chase camera (6.6 above the road) over the low wall at the road's
+        // edge (2.6 high), chest and head - nearer in, the wall hides them
+        for (const sg of [1, -1]) {
+          const edge = roadEdge(i, sg) + 1, eye = p.y + 6.6, shoulders = water - sink + H * 0.6;
+          // the wall stands on the road's own surface at its edge (higher than the middle on a camber)
+          const ex = p.x + side.x * edge * sg, ez = p.z + side.z * edge * sg;
+          const wallTop = Math.max(p.y, groundAt(ex, ez, p.y + 15) ?? p.y) + 3;
+          if (wallTop >= eye - 0.5) continue;                                 // the wall is at eye height: nothing beyond shows
+          for (let d = edge + 12; d < edge + 320 && !at; d += 4) {
+            if (eye - ((eye - wallTop) * d) / edge > shoulders) continue;     // still behind the wall
+            const x = p.x + side.x * d * sg, z = p.z + side.z * d * sg;
+            const bed = groundAt(x, z, water + 20);
+            if (bed !== null && bed <= water - sink - 0.3 && bed > water - 400) at = new THREE.Vector3(x, water - sink, z);
+          }
+          if (at) break;
+        }
+        if (!at || tooClose(at, H * 0.5) || onRoadAt(at.x, at.z, water, 4)) continue;
+        const faceRoad = faceYaw(p.clone().sub(at).setY(0).normalize());
+        const s = spawn(looks[k % looks.length], H * (0.92 + Math.random() * 0.16), at, faceRoad, { fixed: true, unarmed: true });
+        s.watch = { home: faceRoad };
+        if (Math.random() < (v.swim ?? 0.3) && s.walk) {   // wading along the shore, slowly, and back
+          const reach = 12 + Math.random() * 25;
+          s.wade = { a: at.clone().addScaledVector(tan, -reach), b: at.clone().addScaledVector(tan, reach), toB: Math.random() < 0.5, speed: 1.6 + Math.random() };
+          s.walk.timeScale = 0.55;
+        }
+        first ??= s;
+        break;
+      }
+    }
+    if (first) shots.push({ pos: first.npc.position.clone(), height: H, radius: 10, title: v.title });
+  }
+
+  // { kind: 'ship', title, model, height, water, keel, loop: { center: [x, y], rx, ry } (EQ), speed,
+  //   crew: [pc files], crewCount, deck: [y, x0, x1, half] }: a ship sailing a loop round the course,
+  //   rolling gently, its passengers at the rails looking out (deck in the model's own units: height
+  //   above its keel, from stern to bow along it, half its beam)
+  async function placeShip(v) {
+    const m = await loadModel(fileOf(v.model));
+    if (!m) return;
+    const scale = v.height / m.height;
+    const L = v.loop, cx = L.center[0], cz = -L.center[1];
+    const dir = v.clockwise === false ? 1 : -1;
+    const at = (u) => { const a = L.from + dir * u * Math.PI * 2; return new THREE.Vector3(cx + L.rx * Math.cos(a), 0, cz - L.ry * Math.sin(a)); };
+    // where it is as the race starts: a little before the point nearest the start line, so it sails
+    // past the field early on
+    const start = track.path[track.start ?? 0];
+    let best = 0, bd = Infinity;
+    for (let a = 0; a < 360; a += 2) {
+      const q = new THREE.Vector3(cx + L.rx * Math.cos(a * Math.PI / 180), 0, cz - L.ry * Math.sin(a * Math.PI / 180));
+      const d = q.distanceToSquared(start.clone().setY(0));
+      if (d < bd) { bd = d; best = a * Math.PI / 180; }
+    }
+    L.from = best - dir * (v.lead ?? 0.06) * Math.PI * 2;
+    let len = 0;
+    for (let k = 0; k < 200; k++) len += at(k / 200).distanceTo(at((k + 1) / 200));
+    const y = v.water - (v.keel ?? 9);
+    const ship = spawn(m, v.height, at(0).setY(y), 0, { fixed: true, unarmed: true });
+    ship.npc.rotation.order = 'YXZ';
+    ship.ship = { at, len, u: 0, y, speed: v.speed || 30, t: Math.random() * 10 };
+    // the passengers, along both rails
+    const crew = (await Promise.all(heroFiles(v.crew || ['pc_HUM']).map((f) => loadModel(f)))).filter(Boolean);
+    const [deckY, x0, x1, half] = v.deck;
+    const n = v.crewCount || 8;
+    for (let k = 0; k < n && crew.length; k++) {
+      const sideSg = k % 2 ? 1 : -1, along = x0 + ((Math.floor(k / 2) + 0.5) / Math.ceil(n / 2)) * (x1 - x0);
+      const c = spawn(crew[k % crew.length], 6 * (0.94 + Math.random() * 0.12), new THREE.Vector3(), 0, { fixed: true, unarmed: true, crowd: true });
+      ship.npc.add(c.npc);                              // rides with the ship (the model's own axes: it faces -z)
+      c.npc.position.set(sideSg * half, deckY, -along);
+      c.npc.rotation.y = faceYaw(new THREE.Vector3(sideSg, 0, 0));   // out over the rail
+      c.npc.scale.multiplyScalar(1 / scale);
+      c.aboard = true;
+    }
+  }
+
   // --- 4. a crowd at the start / finish: player characters lining both sides of the straight
   {
     const files = ['pc_HUM', 'pc_ELF', 'pc_DWM', 'pc_HIF', 'pc_BAM', 'pc_ERM', 'pc_DAF', 'pc_HOM', 'pc_OGM', 'pc_GNF'];
@@ -596,6 +688,38 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
   function update(dt, karts = [], eqfx = null) {
     for (const s of placed) {
       s.mixer.update(dt);
+      if (s.aboard) continue;                                // a ship's passenger: rides along, idles
+      if (s.ship) {                                          // round its loop, rolling a little on the swell
+        const S = s.ship;
+        S.t += dt;
+        S.u = (S.u + (dt * S.speed) / S.len) % 1;
+        const p = S.at(S.u), q = S.at((S.u + 0.003) % 1);
+        s.npc.position.set(p.x, S.y + Math.sin(S.t * 0.8) * 0.35, p.z);
+        s.npc.rotation.set(Math.sin(S.t * 0.55) * 0.012, faceYaw(q.sub(p).setY(0).normalize()), Math.sin(S.t * 0.7) * 0.025);
+        continue;
+      }
+      if (s.hover) {                                          // a flyer bobs where it floats
+        s.bob += dt * 1.7;
+        s.npc.position.y = s.gy + s.hover + Math.sin(s.bob) * s.hover * 0.18;
+      }
+      if (s.watch) {                                          // a wader: turns to the nearest kart going by
+        let near = null, nd = 90 * 90;
+        for (const k of karts) { const d = k.pos.distanceToSquared(s.npc.position); if (d < nd) { nd = d; near = k; } }
+        if (s.wade && !near) {
+          const W = s.wade, to = (W.toB ? W.b : W.a).clone().sub(s.npc.position).setY(0);
+          if (to.length() < 0.6) W.toB = !W.toB;
+          else {
+            to.normalize();
+            s.npc.position.addScaledVector(to, W.speed * dt);
+            if (!s.walk.isRunning()) { s.walk.reset().play(); s.idle?.stop(); }
+            s.npc.rotation.y += Math.atan2(Math.sin(faceYaw(to) - s.npc.rotation.y), Math.cos(faceYaw(to) - s.npc.rotation.y)) * Math.min(1, dt * 3);
+            continue;
+          }
+        }
+        if (s.walk?.isRunning() && s.wade) { s.walk.stop(); s.idle?.reset().play(); }
+        const want = near ? faceYaw(near.pos.clone().sub(s.npc.position).setY(0).normalize()) : s.watch.home;
+        s.npc.rotation.y += Math.atan2(Math.sin(want - s.npc.rotation.y), Math.cos(want - s.npc.rotation.y)) * Math.min(1, dt * 2.5);
+      }
       if (s.jets) {
         for (const j of s.jets) {
           j.t += dt;
@@ -716,7 +840,9 @@ export async function placeNpcs(scene, track, collider, zoneFile) {
           d.normalize();
           const nextP = s.npc.position.clone().addScaledVector(d, P.speed * dt);
           const gy = ground(collider, nextP);
-          if (gy === null || Math.abs(gy - s.npc.position.y) > 6 || onRoadAt(nextP.x, nextP.z, gy, s.radius)) P.toB = !P.toB;   // edge, wall or road: turn round
+          const was = s.hover ? s.gy : s.npc.position.y;
+          if (gy === null || Math.abs(gy - was) > 6 || onRoadAt(nextP.x, nextP.z, gy, s.radius)) P.toB = !P.toB;   // edge, wall or road: turn round
+          else if (s.hover) { s.gy = gy; s.npc.position.set(nextP.x, s.npc.position.y, nextP.z); s.npc.rotation.y = faceYaw(d); }
           else { s.npc.position.copy(nextP).setY(gy); s.npc.rotation.y = faceYaw(d); }
         }
         continue;

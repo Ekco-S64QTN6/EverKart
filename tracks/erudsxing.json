@@ -1,0 +1,43 @@
+{
+ "name": "erudsxing",
+ "zone": "erudsxing",
+ "title": "Erud's Crossing",
+ "sub": "Round the Kerran isle, on the sand",
+ "menu_name": "Erud's Crossing",
+ "half_width": 22,
+ "laps": 3,
+ "music_zone": "erudsxing",
+ "music3d": "erudsxing_0.ogg",
+ "min_floor_z": -15,
+ "avoid": ["seafloor.bmp", "w1.bmp", "dock.bmp"],
+ "contour": {"z": 0, "weight": 2, "centre": 0.15},
+ "waypoints": [
+  [-665, 1290], [-677, 1454], [-690, 1630], [-809, 1771], [-962, 1857], [-1139, 1855], [-1290, 1855],
+  [-1423, 1795], [-1580, 1800], [-1668, 1668], [-1719, 1538], [-1715, 1403], [-1735, 1290], [-1750, 1166],
+  [-1705, 1060], [-1712, 1000], [-1745, 940], [-1745, 880], [-1730, 825], [-1650, 793], [-1560, 778],
+  [-1500, 765], [-1430, 772], [-1360, 790], [-1290, 825], [-1152, 773], [-1012, 809], [-876, 876],
+  [-770, 990], [-662, 1122]
+ ],
+ "course": {
+  "road": "sand3.bmp",
+  "kerb": "dock.bmp",
+  "barrier": "bamboo.bmp",
+  "road_bright": 1.3,
+  "open_width": 20
+ },
+ "item_rows": [0.18, 0.5, 0.8],
+ "npcs3d": [
+  {"model": "CPM", "count": 5, "height": 6.5},
+  {"model": "CPF", "count": 4, "height": 6}
+ ],
+ "vignettes": [
+  {"kind": "herd", "title": "The Kerran village", "at": [-1545, 900], "model": "CPM", "count": 6, "height": 6.5, "radius": 70},
+  {"kind": "herd", "title": "Kerrans at the campfire", "at": [-1520, 830], "model": "CPF", "count": 5, "height": 6, "radius": 45},
+  {"kind": "wade", "title": "Kerrans watching from the water", "models": ["CPM", "CPF"], "count": 24, "group": 3, "height": 6.5,
+   "water": -20, "depth": 0.5, "swim": 0.35},
+  {"kind": "ship", "title": "The boat to Erudin", "model": "PRE", "height": 121, "water": -20, "keel": 9,
+   "loop": {"center": [-1250, 1300], "rx": 1250, "ry": 1100}, "speed": 32, "lead": 0.05,
+   "deck": [13.1, -45, 25, 13.8], "crewCount": 10,
+   "crew": ["pc_HUM", "pc_ERM", "pc_ELF", "pc_DWM", "pc_HIF", "pc_GNF", "pc_BAM", "pc_DAF"]}
+ ]
+}

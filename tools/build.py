@@ -60,7 +60,7 @@ def preflight(app):
         print("note: no music - FluidSynth and a General MIDI soundfont render the zones' music "
               "(set SOUNDFONT=/path/to/file.sf2); the game runs without it\n")
 TRACKS = ["veeshan", "kael", "gfaydark", "oasis", "everfrost", "nektulos", "lavastorm",
-          "fearplane", "hateplane", "growthplane", "mischiefplane", "unrest", "vpeak", "butcher", "northkarana", "ecommons"]
+          "fearplane", "hateplane", "growthplane", "mischiefplane", "unrest", "vpeak", "butcher", "northkarana", "ecommons", "erudsxing"]
 
 
 def run(*args):

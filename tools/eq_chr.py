@@ -33,11 +33,12 @@ def _quat_matrix(w, x, y, z):
 
 
 def keep_faces(verts, tris):
-    """The faces to keep: a few player-race bones carry bad rest data (HUM/BAM hip) that stretches
-    faces across the model - drop a face longer than half the model's size. The size is the model's
-    largest extent in any direction, not its height: a bat or a bird rests with its wings spread
-    flat (3 tall, 23 across), a snake lies along the ground - measured by height, their wings and
-    bodies were cut away."""
+    """The faces to keep in a model posed for good (a sprite, a seated driver): a few player-race
+    bones carry bad rest data (HUM/BAM hip) that stretches faces across the model - drop a face
+    longer than half the model's size, its largest extent in any direction (a bat rests with its
+    wings spread flat: 3 tall, 23 across). Never for a skinned, animated model (`model(...,
+    guard=False)`): skinning cancels the rest pose out (each face takes its shape from the
+    animation), so there the rule only cut real geometry - a fae drake's wings, a mimic's chest."""
     size = lambda v: max(float(np.ptp(v, axis=0).max()), 1e-6)
     edge = np.ptp(verts[tris], axis=1).max(axis=1)
     ok = edge < 0.5 * size(verts) + 1.0
@@ -281,7 +282,7 @@ class Characters:
                 return alt
         return tex
 
-    def model(self, name, anim="P01"):
+    def model(self, name, anim="P01", guard=True):
         self._code = name
         """Posed model: verts (N,3), uv (N,2), tris (M,3), tri_tex (list of texture arrays/None)."""
         b = next(b for n, b in self.wld.of_type(0x10) if n == f"{name}_HS_DEF")
@@ -340,7 +341,7 @@ class Characters:
             base += len(v)
         verts, uvs, tris = np.concatenate(verts), np.concatenate(uvs), np.array(tris)
         self.last_joints = np.concatenate(joints)
-        ok = keep_faces(verts, tris)
+        ok = keep_faces(verts, tris) if guard else np.ones(len(tris), bool)
         tri_tex = [x for x, k in zip(tri_tex, ok) if k]
         self.last_materials = [x for x, k in zip(self.last_materials, ok) if k]
         return verts, uvs, tris[ok], tri_tex

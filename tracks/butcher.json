@@ -137,7 +137,8 @@
   {
    "model": "BAT",
    "count": 3,
-   "height": 1.2
+   "height": 1.2,
+   "hover": 7
   }
  ],
  "vignettes": [

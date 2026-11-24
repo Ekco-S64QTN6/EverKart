@@ -27,6 +27,7 @@ export const ZONE_HEADER = {
   'butcher.glb': { sky: 1, fog: [200, 220, 235], fogClip: [10, 900], clip: [500, 1600] },   // estimated: no header on record
   'northkarana.glb': { sky: 1, fog: [200, 220, 235], fogClip: [10, 1000], clip: [600, 1800] },   // estimated: no header on record
   'ecommons.glb': { sky: 1, fog: [210, 215, 200], fogClip: [10, 1000], clip: [600, 1800] },   // estimated: no header on record
+  'erudsxing.glb': { sky: 1, fog: [190, 215, 235], fogClip: [10, 1400], clip: [600, 2000] },   // estimated: open sea, no header on record
 };
 // sky.wld's sets (LAYER<n>1 and LAYER<n>3): the sky layer, the cloud layer, and how many times
 // each texture repeats across the dome - EverQuest projects them flat from above. Sky 0 is no
@@ -55,6 +56,7 @@ export const ZONE_LOOK = {
   'veeshan.glb': { ambient: 0.36, gain: 1.6 },
   'butcher.glb': { ambient: 0.45, gain: 1.4, open: true, hour: 10 },
   'northkarana.glb': { ambient: 0.45, gain: 1.4, open: true, hour: 12 },
+  'erudsxing.glb': { ambient: 0.6, gain: 1.6, open: true, hour: 11 },   // a bright open sea: its baked light is dim
   'ecommons.glb': { ambient: 0.45, gain: 1.4, open: true, hour: 14 },
 };
 const FOG_MIN = 260;        // the fog's far edge at least this far: a kart covers 200 units in under 3 s

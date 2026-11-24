@@ -287,14 +287,29 @@ class GroundQuery:
 
 
 class Footprints:
-    """The ground plans of solid things (columns, statues, beds; lava pools) as a 1-unit raster:
-    hit(x, y, z) - does one stand at (x, y) at about height z?"""
+    """The ground plans of solid things (columns, statues, beds; lava pools, the sea) as a 1-unit
+    raster: hit(x, y, z) - does one stand at (x, y) at about height z?
+    A large shape (a sea's triangles, thousands of units across) is not rasterised - millions of
+    cells - but kept as its outline and tested where asked, found through a coarse grid of buckets;
+    only shapes inside `box` (the route's surroundings) are kept at all."""
 
-    def __init__(self, shapes, res=1.0):
+    def __init__(self, shapes, res=1.0, box=None, big=4000.0, bucket=64.0):
         from matplotlib.path import Path as MPath
         self.res, self.cells = res, {}
+        self.bucket, self.big, self.bigb = bucket, [], {}
         for poly, zl, zh in shapes:
             lo, hi = poly.min(axis=0), poly.max(axis=0)
+            if box is not None:
+                if (hi < box[0]).any() or (lo > box[1]).any():
+                    continue
+                lo, hi = np.maximum(lo, box[0]), np.minimum(hi, box[1])
+            if np.prod(hi - lo) > big:
+                k = len(self.big)
+                self.big.append((MPath(poly), MPath(poly[::-1]), zl, zh))
+                for bx in range(int(lo[0] // bucket), int(hi[0] // bucket) + 1):
+                    for by in range(int(lo[1] // bucket), int(hi[1] // bucket) + 1):
+                        self.bigb.setdefault((bx, by), []).append(k)
+                continue
             gx, gy = np.meshgrid(np.arange(np.floor(lo[0]), np.ceil(hi[0]) + res, res),
                                  np.arange(np.floor(lo[1]), np.ceil(hi[1]) + res, res))
             pts = np.stack([gx.ravel(), gy.ravel()], axis=1)
@@ -305,6 +320,10 @@ class Footprints:
     def hit(self, x, y, z):
         for zl, zh in self.cells.get((int(np.floor(x / self.res)), int(np.floor(y / self.res))), ()):
             if zl - 8 < z < zh:
+                return True
+        for k in self.bigb.get((int(x // self.bucket), int(y // self.bucket)), ()):
+            path, rpath, zl, zh = self.big[k]
+            if zl - 8 < z < zh and (path.contains_point((x, y)) or rpath.contains_point((x, y))):
                 return True
         return False
 
@@ -356,7 +375,7 @@ def main(name):
     if shapes:
         print(f"  {grid.block(shapes, margin=cfg.get('architecture_margin', 4.0))} floor cells under {len(shapes)} pieces of architecture taken out")
     navgrid = grid
-    footprints = Footprints([*shapes, *under])
+    footprints = Footprints([*shapes, *under], box=(wp.min(axis=0) - 700, wp.max(axis=0) + 700))
     walls = WallMap(grid, verts, tris, wp.min(axis=0) - 700, wp.max(axis=0) + 700)
     ground = GroundQuery(verts, tris[:len(obj)][~obj])
     things = WallMap(grid, verts, tris[:len(obj)][obj], wp.min(axis=0) - 700, wp.max(axis=0) + 700, steep_only=False, band=(1.0, 9.0))
@@ -374,7 +393,7 @@ def main(name):
         hints = z_hints(grid, wp, cfg.get("z_hint"))
         if cfg.get("wp_z"):                            # per-waypoint floor heights (multi-level zones)
             hints = [h if h is not None else (hints[k] if hints else None) for k, h in enumerate(cfg["wp_z"])]
-        routed, problems = grid.route(wp, hints, closed=closed)
+        routed, problems = grid.route(wp, hints, closed=closed, contour=cfg.get("contour"))
         if os.environ.get("DEBUG_WP"):                   # where each waypoint landed on the floor
             area = grid.main_area(wp)
             for k, (x, y) in enumerate(wp):

@@ -7,7 +7,7 @@ import * as THREE from 'three';
 // which zones have which weather (desert, the planes, dungeons and Lavastorm: none)
 export const ZONE_WEATHER = {
   'gfaydark.glb': 'rain', 'nektulos.glb': 'rain', 'unrest.glb': 'rain', 'butcher.glb': 'rain',
-  'northkarana.glb': 'rain', 'ecommons.glb': 'rain', 'growthplane.glb': 'rain', 'everfrost.glb': 'snow',
+  'northkarana.glb': 'rain', 'ecommons.glb': 'rain', 'erudsxing.glb': 'rain', 'growthplane.glb': 'rain', 'everfrost.glb': 'snow',
 };
 const CHANCE = { rain: 0.35, snow: 0.55 };
 

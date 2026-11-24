@@ -254,9 +254,11 @@ class NavGrid:
         best = max(votes, key=lambda c: (votes[c], np.mean(heights[c]))) if votes else int(np.argmax(sizes))
         return comp == best
 
-    def astar(self, s, g, min_clear=1.5):
+    def astar(self, s, g, min_clear=1.5, contour=None):
         goal = self.nodes[g]
         pen = 6.0 / (np.minimum(self.clear, 12) + 0.5)   # walls cost extra: drive mid-corridor
+        if contour:                                      # a road along a shore or a hillside: keep to one height
+            pen = pen * contour.get("centre", 0.3) + contour.get("weight", 0.3) * np.abs(self.nodes[:, 2] - contour["z"]) / 10
         best = {s: 0.0}
         prev = {}
         heap = [(0.0, s)]
@@ -290,14 +292,16 @@ class NavGrid:
         return np.stack([p[:, 0] * self.cell + self.x0 + self.cell / 2,
                          p[:, 1] * self.cell + self.y0 + self.cell / 2, p[:, 2]], axis=1)
 
-    def route(self, waypoints, z_hints=None, closed=True):
-        """A* between consecutive waypoints; closed: back to the first one (a lap)."""
+    def route(self, waypoints, z_hints=None, closed=True, contour=None):
+        """A* between consecutive waypoints; closed: back to the first one (a lap). contour: {z, weight,
+        centre} - the route holds height z (a beach road just above the sea) rather than seeking the
+        middle of the open floor (which on a slope is up it)."""
         area = self.main_area(waypoints)
         ids = [self.nearest(x, y, None if z_hints is None else z_hints[k], area) for k, (x, y) in enumerate(waypoints)]
         full, problems = [], []
         for k in range(len(ids) if closed else len(ids) - 1):
             a, b = ids[k], ids[(k + 1) % len(ids)]
-            p = self.astar(a, b) or self.astar(a, b, min_clear=0.5)
+            p = self.astar(a, b, contour=contour) or self.astar(a, b, min_clear=0.5, contour=contour)
             if p is None:
                 problems.append(k)
                 p = [a, b]

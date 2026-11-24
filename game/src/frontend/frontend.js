@@ -18,7 +18,7 @@ import { settings, setSetting, DIFFICULTY, SPEED_CLASSES, speedClass, applyFulls
 
 // --- the campaign: four cups, points per race, a trophy per cup ------------------------------------
 export const CUPS = [
-  { id: 'antonica', name: 'Antonica Cup', sub: 'Plains, forest and desert of the old continent', tracks: ['northkarana', 'ecommons', 'nektulos', 'oasis'] },
+  { id: 'antonica', name: 'Antonica Cup', sub: 'Plains, forest and desert of the old continent, and the crossing to Odus', tracks: ['northkarana', 'ecommons', 'nektulos', 'oasis', 'erudsxing'] },
   { id: 'faydwer', name: 'Faydwer Cup', sub: 'Elves, orcs and the restless dead', tracks: ['gfaydark', 'butcher', 'unrest'] },
   { id: 'planes', name: 'Planes Cup', sub: 'Through the realms of the gods', tracks: ['fearplane', 'hateplane', 'growthplane', 'mischiefplane'] },
   { id: 'dragons', name: 'Dragon Cup', sub: 'Vox’s and Nagafen’s lands, Velious and the dragons’ peak', tracks: ['everfrost', 'lavastorm', 'kael', 'veeshan', 'vpeak'] },

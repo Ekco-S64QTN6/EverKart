@@ -125,7 +125,7 @@ def find_donor(chars, code, suffixes):
 def export_skinned(zone, model, chars, global_chars=None, donor=None, out_name=None):
     """game/public/npcs/<zone>_<model>.glb: skinned mesh + idle/walk clips."""
     chars.anim_source = None
-    verts, uv, tris, _ = chars.model(model, None)          # rest pose
+    verts, uv, tris, _ = chars.model(model, None, guard=False)   # rest pose, every face (skinned: see keep_faces)
     joints = chars.last_joints
     sk = chars.last_skeleton
     mats = chars.last_materials
@@ -356,21 +356,28 @@ def main_skinned(names):
         for sk in cfg.get("skirmishes", []):
             models += [m for m in sk["foes"] + sk["heroes"] if not m.startswith("pc_")]
         for v in cfg.get("vignettes", []):            # the zone's scenes in the race intro
-            models += [m for m in v.get("foes", []) + v.get("heroes", []) + ([v["model"]] if v.get("model") else [])
+            models += [m for m in v.get("foes", []) + v.get("heroes", []) + v.get("models", []) + ([v["model"]] if v.get("model") else [])
                        + [v[k] for k in ("foe", "hero") if isinstance(v.get(k), str)] if not m.startswith("pc_")]
+        # a creature the zone has no model for, borrowed from another zone's (Greater Faydark's black
+        # bears from Nektulos: `"from": "nektulos"`); still exported as <zone>_<model>
+        borrowed, srcs = {}, {}
+        for spec in cfg.get("npcs3d", []):
+            if spec.get("from"):
+                srcs[spec["model"]] = borrowed.setdefault(spec["from"], Characters(spec["from"]))
         # NPCs shown in several texture sets (one dragon of each colour, a named dragon's own
         # colours): <zone>_<model>_v<n>
         looks = [(spec["model"], v) for spec in cfg.get("npcs3d", []) for v in spec.get("variants", [])]
         looks += [(sc["model"], sc["variant"]) for sc in cfg.get("scenes", []) if "variant" in sc]
         looks += [(v["foe"], v["foeVariant"]) for v in cfg.get("vignettes", []) if "foeVariant" in v]
         for model, v in dict.fromkeys(looks):
-            chars.variant = v
-            export_skinned(cfg["zone"], model, chars, global_chars, out_name=f"{cfg['zone']}_{model}_v{v}")
-        chars.variant = None
+            src = srcs.get(model, chars)
+            src.variant = v
+            export_skinned(cfg["zone"], model, src, global_chars, out_name=f"{cfg['zone']}_{model}_v{v}")
+            src.variant = None
         for model in dict.fromkeys(models):
             try:
-                src = chars
-                if model not in chars.names():           # gods and the like live in global2_chr.s3d
+                src = srcs.get(model, chars)
+                if model not in src.names():             # gods and the like live in global2_chr.s3d
                     src = gods = globals().get("_GODS") or Characters(archive=need("global2_chr.s3d"))
                     globals()["_GODS"] = gods
                 export_skinned(cfg["zone"], model, src, global_chars)
